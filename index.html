@@ -451,9 +451,9 @@ footer{
 .detail-price{font-size:28px;font-weight:600;color:var(--ink)}
 .detail-unit{font-size:14px;color:var(--muted)}
 .qty-row{display:flex;align-items:center;gap:10px;margin-bottom:20px}
-.variant-group{margin-bottom:16px}
-.variant-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;letter-spacing:0.3px;text-transform:uppercase}
-.variant-options{display:flex;gap:8px;flex-wrap:wrap}
+.variant-group{margin-bottom:18px}
+.variant-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:1.2px;text-transform:uppercase}
+.variant-options{display:flex;gap:10px;flex-wrap:wrap}
 .variant-chip{
   padding:8px 16px;border:1.5px solid var(--line);border-radius:100px;
   font-size:13px;font-weight:600;cursor:pointer;background:var(--paper);color:var(--ink);
@@ -461,6 +461,27 @@ footer{
 }
 .variant-chip:hover{border-color:var(--gold)}
 .variant-chip.selected{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.variant-swatch{
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  background:var(--paper);border:1.5px solid var(--line);border-radius:14px;cursor:pointer;padding:6px;
+  min-width:76px;transition:all .2s ease;box-shadow:0 5px 16px rgba(13,13,13,0.04);
+}
+.variant-swatch:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 10px 22px rgba(176,141,87,0.12)}
+.variant-swatch img{
+  width:62px;height:62px;border-radius:10px;object-fit:cover;
+  border:2px solid transparent;transition:all .2s ease;
+}
+.variant-swatch.selected{border-color:var(--ink);box-shadow:0 10px 24px rgba(13,13,13,0.12)}
+.variant-swatch.selected img{border-color:var(--ink)}
+.variant-swatch span{font-size:11px;font-weight:700;color:var(--ink);max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.variant-design-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.variant-design-card{position:relative;display:block;width:100%;padding:0;border:1.5px solid var(--line);border-radius:16px;overflow:hidden;background:var(--paper);cursor:pointer;text-align:left;transition:all .22s ease;box-shadow:0 6px 20px rgba(13,13,13,0.04)}
+.variant-design-card img{display:block;width:100%;aspect-ratio:1.15;object-fit:cover}
+.variant-design-card span{display:block;padding:10px 12px;font-size:12px;font-weight:700;color:var(--ink)}
+.variant-design-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 14px 28px rgba(176,141,87,0.14)}
+.variant-design-card.selected{border-color:var(--ink);box-shadow:0 0 0 2px var(--paper),0 0 0 4px var(--ink),0 14px 28px rgba(13,13,13,0.12)}
+.variant-design-card.selected span{background:var(--ink);color:var(--white)}
+.variant-count{font-size:10px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0}
 .qty-btn{
   width:40px;height:40px;border:1.5px solid var(--gold);
   border-radius:50%;background:var(--surface2);color:var(--ink);font-size:18px;
@@ -490,6 +511,21 @@ footer{
 .sim-card:hover{border-color:var(--gold);transform:translateY(-2px)}
 .sim-card img{width:100%;aspect-ratio:1;object-fit:cover}
 .sim-card-name{padding:8px;font-size:11px;font-weight:500;line-height:1.3}
+
+.variant-design-card:focus-visible,.variant-swatch:focus-visible,.variant-chip:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media(max-width:720px){
+  .detail-grid{grid-template-columns:1fr}
+  .detail-img{min-height:300px;padding:28px;border-radius:24px 24px 0 0}
+  .detail-img img{max-height:42vh}
+  .detail-info{padding:30px 24px 34px}
+  .detail-name{font-size:28px}
+  .variant-design-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .variant-design-card img{aspect-ratio:1.05}
+  .variant-swatch{min-width:70px}
+  .variant-swatch img{width:56px;height:56px}
+  .similar-section{padding:24px}
+  .similar-grid{grid-template-columns:repeat(2,1fr)}
+}
 
 /* ── CART MODAL ── */
 .cart-modal{max-width:720px}
@@ -934,6 +970,7 @@ footer{
           <div id="dp" class="detail-price"></div>
           <div id="du" class="detail-unit"></div>
         </div>
+        <div id="descWrap"></div>
         <div id="variantWrap"></div>
         <div class="qty-row">
           <button class="qty-btn" onclick="chg(-1)">−</button>
@@ -1035,7 +1072,7 @@ footer{
 </button>
 
 <script>
-const D={"retail":[{"id":1,"name":"Hello Kitty Crystal Pendant Necklace","price":1500,"unit":"piece","image":"https://i.ibb.co/tMfRWbVn/1786952729315.png"},{"id":2,"name":"Waist Chain","price":3000,"unit":"piece","image":"https://i.ibb.co/HDgcF7fR/1786952792510.png"},{"id":3,"name":"Stainless Steel Necklace","price":1000,"unit":"piece","image":"https://i.ibb.co/JWcP4Fqm/1786952910811.png"},{"id":4,"name":"Stainless Steel Necklace","price":1000,"unit":"piece","image":"https://i.ibb.co/wZx6VDjB/1786952964985.png"},{"id":5,"name":"Stainless Steel Necklace","price":1000,"unit":"piece","image":"https://i.ibb.co/dJsQ6zpr/1786953183394.png"},{"id":6,"name":"Fashion Necklace","price":700,"unit":"piece","image":"https://i.ibb.co/WvqQJRrY/1786953253718.png"},{"id":7,"name":"Fashion Necklace","price":700,"unit":"piece","image":"https://i.ibb.co/chpxzBbP/1786953448188.png"},{"id":8,"name":"Bangles and Ring","price":1500,"unit":"piece","image":"https://i.ibb.co/WCCc1gH/1786953603014.png"},{"id":9,"name":"Fashion Mini Bangles and Rings","price":1000,"unit":"piece","image":"https://i.ibb.co/qLMrtP2N/1786953993721.png"},{"id":10,"name":"Steel Bracelet","price":1500,"unit":"piece","image":"https://i.ibb.co/n8KhmQ8y/1786954047181.png"},{"id":11,"name":"Gold Design Steel Bracelet","price":1500,"unit":"piece","image":"https://i.ibb.co/m5kF6GpF/1786954240904.png"},{"id":12,"name":"Silver Design Steel Bracelet","price":1500,"unit":"piece","image":"https://i.ibb.co/35LtXYj9/1786954417190.png"},{"id":13,"name":"Calvin Klein Rubber Watch","price":1900,"unit":"piece","image":"https://i.ibb.co/hQwrw37/1786954511180.png"},{"id":14,"name":"Calvin Klein Rubber Watch","price":1900,"unit":"piece","image":"https://i.ibb.co/8DfzX8bd/1786954633626.png"},{"id":15,"name":"RRADD Watch","price":1900,"unit":"piece","image":"https://i.ibb.co/hRwK1XD1/1786954766921.png"},{"id":16,"name":"RRADD Watch","price":1900,"unit":"piece","image":"https://i.ibb.co/B5zppWjy/1786954927235.png"},{"id":17,"name":"Chunky Bracelet","price":2900,"unit":"piece","image":"https://i.ibb.co/bjjf1qNr/1786955197099.png"},{"id":18,"name":"Mini Bracelet","price":2900,"unit":"piece","image":"https://i.ibb.co/HpPGZS6L/1786955337274.png"},{"id":19,"name":"Hello Kitty Necklace","price":1500,"unit":"piece","image":"https://i.ibb.co/FbHrJNSB/1786955414012.png"},{"id":20,"name":"Tennis Bracelet","price":1900,"unit":"piece","image":"https://i.ibb.co/nMfBtsd0/1786955534930.png"},{"id":21,"name":"Watch","price":5000,"unit":"piece","image":"https://i.ibb.co/Gfqtd7h7/1786955959003.png"},{"id":22,"name":"Gold Design Watch","price":3000,"unit":"piece","image":"https://i.ibb.co/KcxT3RMR/1786956840345.png"},{"id":23,"name":"Silver Design Watch","price":3000,"unit":"piece","image":"https://i.ibb.co/G3njdF12/1786956885011.png"},{"id":24,"name":"Gold Design Watch","price":3000,"unit":"piece","image":"https://i.ibb.co/XG47Mtz/1786956945005.png"}],"wholesale":[{"id":1,"name":"VCA Bracelet","price":3000,"unit":"piece","moq":3,"contents":"3 pcs MOQ","image":"https://i.ibb.co/4nPRqqwj/1786968706201.png"},{"id":2,"name":"Necklace with Matching Earrings","price":12000,"unit":"pack","moq":1,"contents":"1 pack = 12 pcs","image":"https://i.ibb.co/XZM1Bwx5/1786968719369.png"},{"id":3,"name":"Fake Piercing Sticker Pack","price":1500,"unit":"pack","moq":1,"contents":"1 pack = 84 stickers","image":"https://i.ibb.co/5Wz5CQfM/1786968775356.png"},{"id":4,"name":"Zirconia Earrings","price":8000,"unit":"pack","moq":1,"contents":"1 pack = 12 pcs","image":"https://i.ibb.co/V0NJL1KX/1786968804728.png"},{"id":5,"name":"Necklace with Earrings","price":18000,"unit":"dozen","moq":1,"contents":"1 dozen = 12 pcs","image":"https://i.ibb.co/KzqX7dmN/1786968828322.png"},{"id":6,"name":"Necklace with Earrings","price":18000,"unit":"dozen","moq":1,"contents":"1 dozen = 12 pcs","image":"https://i.ibb.co/dwvgBSQq/1786968912973.png"},{"id":7,"name":"Necklace with Earrings","price":18000,"unit":"dozen","moq":1,"contents":"1 dozen = 12 pcs","image":"https://i.ibb.co/1fsLvQHM/1786968970399.png"},{"id":8,"name":"Necklace with Earrings","price":18000,"unit":"dozen","moq":1,"contents":"1 dozen = 12 pcs","image":"https://i.ibb.co/ZRXfpf2L/1786969013164.png"},{"id":9,"name":"Leg Chain","price":7800,"unit":"dozen","moq":1,"contents":"1 dozen = 12 pcs","image":"https://i.ibb.co/fdg8pzh9/1786969070792.png"},{"id":10,"name":"Stainless Steel Rings","price":25500,"unit":"box","moq":1,"contents":"1 box = 36 pcs","image":"https://i.ibb.co/ynMYnPPY/1786969114948.png"},{"id":11,"name":"Necklace with Earrings","price":18000,"unit":"dozen","moq":1,"contents":"1 dozen = 12 pcs","image":"https://i.ibb.co/xtrGqvqC/1786969213894.png"},{"id":12,"name":"Hello Kitty Necklace","price":20000,"unit":"pack","moq":1,"contents":"1 pack = 12 pcs","image":"https://i.ibb.co/7dTbYw9d/1786969384380.png"},{"id":13,"name":"Hello Kitty Necklace","price":20000,"unit":"pack","moq":1,"contents":"1 pack = 12 pcs","image":"https://i.ibb.co/1fnPQBy7/1786969424182.png"},{"id":14,"name":"Hoop Earrings","price":5000,"unit":"pack","moq":1,"contents":"1 pack = 12 pcs","image":"https://i.ibb.co/chSQFQh8/1786969466305.png"},{"id":15,"name":"Hoop Earrings","price":5000,"unit":"pack","moq":1,"contents":"1 pack = 12 pcs","image":"https://i.ibb.co/mrfmCrC3/1786969518156.png"}]};
+let D={retail:[],wholesale:[]}; // populated live from Supabase — see loadDbProducts()
 
 const WA="2349152313648";
 const EMAILJS_SERVICE_ID="service_romiluxe";
@@ -1046,7 +1083,7 @@ const PAYMENT={bankName:"Palmpay",accountName:"Moromoke Ayomide Lawal",accountNu
 const SUPABASE_URL="https://crrtunosemhnmiaquevn.supabase.co";
 const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNycnR1bm9zZW1obm1pYXF1ZXZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc1OTA4MjUsImV4cCI6MjEwMzE2NjgyNX0.H22GBlIwpMM9k-3X1K_ufZ91k4DOA9LArmG8c4b_LE8";
 
-let cur,typ,q,cart=[],selectedColor=null,selectedSize=null;
+let cur,typ,q,cart=[],selectedColor=null,selectedDesign=null,selectedSize=null,productsLoadedOnce=false;
 const money=n=>"₦"+Number(n).toLocaleString("en-NG");
 const go=id=>document.getElementById(id)?.scrollIntoView({behavior:"smooth"});
 const cat=p=>{let s=p.name.toLowerCase();if(s.includes("necklace"))return"necklace";if(s.includes("bracelet")||s.includes("bangle"))return"bracelet";if(s.includes("watch"))return"watch";if(s.includes("earring")||s.includes("hoop"))return"earring";return"other"};
@@ -1060,30 +1097,48 @@ function updateProductCounts(){
 }
 async function loadDbProducts(){
   try{
-    const res=await fetch(`${SUPABASE_URL}/rest/v1/products?select=*&order=created_at.asc`,{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/products?is_deleted=eq.false&select=*&order=created_at.asc`,{
       headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY}
     });
-    if(!res.ok)return;
+    if(!res.ok)throw new Error("Fetch failed: "+res.status);
     const rows=await res.json();
-    if(!Array.isArray(rows))return;
+    if(!Array.isArray(rows))throw new Error("Unexpected response");
+    D.retail=[];D.wholesale=[];
     rows.forEach(r=>{
       const cat=r.category==="wholesale"?"wholesale":"retail";
+      let colorVariants=[];
+      if(r.color_variants){
+        try{
+          const parsed=typeof r.color_variants==="string"?JSON.parse(r.color_variants):r.color_variants;
+          colorVariants=Array.isArray(parsed)?parsed.filter(v=>v&&v.image):[];
+        }catch(e){console.warn("Invalid product variants for",r.id,e);colorVariants=[]}
+      }
       const item={
-        id:100000+Number(r.id),
+        id:Number(r.id),
         name:r.name,price:Number(r.price)||0,unit:r.unit||"piece",
         image:r.image_url,
+        description:r.description||"",
         moq:cat==="wholesale"?(Number(r.moq)||1):undefined,
         contents:cat==="wholesale"?(r.contents||""):undefined,
-        colors:r.colors?String(r.colors).split(",").map(s=>s.trim()).filter(Boolean):[],
+        colors:colorVariants.filter(v=>v.type!=="design").map(v=>v.color).filter(Boolean).length?colorVariants.filter(v=>v.type!=="design").map(v=>v.color).filter(Boolean):(r.colors?String(r.colors).split(",").map(s=>s.trim()).filter(Boolean):[]),
+        colorVariants,
         sizes:r.sizes?String(r.sizes).split(",").map(s=>s.trim()).filter(Boolean):[]
       };
       D[cat].push(item);
     });
-  }catch(e){console.error("Could not load added products",e)}
+    return true;
+  }catch(e){
+    console.error("Could not load products",e);
+    return false;
+  }
 }
 function renderGrid(type,filter){
   const g=document.getElementById(type[0]+"g");
   const items=D[type].filter(p=>filter==="all"||cat(p)===filter);
+  if(!items.length&&!productsLoadedOnce){
+    g.innerHTML="<p style='color:var(--muted);padding:20px'>Loading products…</p>";
+    return;
+  }
   g.innerHTML=items.map(p=>`
     <article class="product-card" onclick="openP('${type}',${p.id})">
       <div class="product-img"><img src="${p.image}" loading="lazy" alt="${p.name}"></div>
@@ -1091,8 +1146,8 @@ function renderGrid(type,filter){
         <div class="product-type">${type}</div>
         <div class="product-name">${p.name}</div>
         <div class="product-price">${money(p.price)}<span style="font-size:13px;font-weight:400;color:var(--muted)">/${p.unit}</span></div>
-        <div class="product-meta">${type==="wholesale"?p.contents:"Individual retail item"}</div>
-        <button class="product-cta">View & Order</button>
+        <div class="product-meta">${type==="wholesale"?p.contents:"Individual retail item"}${p.colorVariants&&p.colorVariants.length?` · ${p.colorVariants.length} ${p.colorVariants.some(v=>v.type==="design")?"designs":"variants"}`:""}</div>
+        <button class="product-cta">Add to Cart</button>
       </div>
     </article>`).join("")||"<p style='color:var(--muted);padding:20px'>No products found.</p>";
   initReveal(g);
@@ -1133,7 +1188,7 @@ function filterWholesale(f,btn){
 // PRODUCT MODAL
 function openP(t,id){
   typ=t;cur=D[t].find(p=>p.id==id);q=t==="wholesale"?cur.moq:1;
-  selectedColor=null;selectedSize=null;
+  selectedColor=null;selectedDesign=null;selectedSize=null;
   document.getElementById("q").value=q;
   document.getElementById("di").src=cur.image;
   document.getElementById("dn").textContent=cur.name;
@@ -1143,6 +1198,7 @@ function openP(t,id){
     :"Retail · Individual item";
   document.getElementById("dp").textContent=money(cur.price);
   document.getElementById("du").textContent="/"+cur.unit;
+  renderDescription();
   renderVariantPickers();
   updateDetail();
   const same=D[t].filter(p=>p.id!=id&&cat(p)==cat(cur));
@@ -1154,12 +1210,35 @@ function openP(t,id){
     </div>`).join("");
   document.getElementById("modal").classList.add("open");
 }
+function renderDescription(){
+  const el=document.getElementById("descWrap");
+  if(cur.description&&cur.description.trim()){
+    el.innerHTML=`<p style="font-size:14px;color:var(--muted);line-height:1.6;margin:8px 0 16px">${cur.description}</p>`;
+  }else{
+    el.innerHTML="";
+  }
+}
 function renderVariantPickers(){
   const wrap=document.getElementById("variantWrap");
   let html="";
-  if(cur.colors&&cur.colors.length){
-    html+=`<div class="variant-group"><div class="variant-label">Colour</div><div class="variant-options">
-      ${cur.colors.map(c=>`<button type="button" class="variant-chip" onclick="selectVariant('color','${c.replace(/'/g,"\\'")}',this)">${c}</button>`).join("")}
+  const designs=(cur.colorVariants||[]).filter(v=>v.type==="design"&&v.image);
+  const colors=(cur.colorVariants||[]).filter(v=>v.type!=="design"&&v.color);
+  if(designs.length){
+    html+=`<div class="variant-group"><div class="variant-label">Choose a design <span class="variant-count">(${designs.length} available)</span></div><div class="variant-design-grid">
+      ${designs.map((v,i)=>`
+        <button type="button" class="variant-design-card" onclick="selectDesignVariant('${String(v.design||('Design '+(i+1))).replace(/'/g,"\\'")}','${v.image}',this)">
+          <img src="${v.image}" alt="${v.design||('Design '+(i+1))}">
+          <span>${v.design||('Design '+(i+1))}</span>
+        </button>`).join("")}
+    </div></div>`;
+  }
+  if(colors.length){
+    html+=`<div class="variant-group"><div class="variant-label">Choose a colour <span class="variant-count">(${colors.length} available)</span></div><div class="variant-options">
+      ${colors.map(v=>`
+        <button type="button" class="variant-swatch" onclick="selectColorVariant('${v.color.replace(/'/g,"\\'")}','${v.image}',this)">
+          <img src="${v.image}" alt="${v.color}">
+          <span>${v.color}</span>
+        </button>`).join("")}
     </div></div>`;
   }
   if(cur.sizes&&cur.sizes.length){
@@ -1168,6 +1247,33 @@ function renderVariantPickers(){
     </div></div>`;
   }
   wrap.innerHTML=html;
+}
+function selectDesignVariant(design,image,btn){
+  const alreadySelected=btn.classList.contains("selected");
+  if(alreadySelected){
+    selectedDesign=null;
+    document.getElementById("di").src=cur.image;
+    btn.classList.remove("selected");
+  }else{
+    selectedDesign=design;
+    document.getElementById("di").src=image;
+    btn.parentElement.querySelectorAll(".variant-design-card").forEach(c=>c.classList.remove("selected"));
+    btn.classList.add("selected");
+  }
+}
+function selectColorVariant(color,image,btn){
+  const alreadySelected=btn.classList.contains("selected");
+  if(alreadySelected){
+    // Tapping the same colour again deselects it and returns to the default cover photo.
+    selectedColor=null;
+    document.getElementById("di").src=cur.image;
+    btn.classList.remove("selected");
+  }else{
+    selectedColor=color;
+    document.getElementById("di").src=image;
+    btn.parentElement.querySelectorAll(".variant-swatch").forEach(c=>c.classList.remove("selected"));
+    btn.classList.add("selected");
+  }
 }
 function selectVariant(kind,value,btn){
   if(kind==="color")selectedColor=value;else selectedSize=value;
@@ -1181,13 +1287,20 @@ function updateDetail(){document.getElementById("tot").textContent="Total: "+mon
 
 // CART
 function addCurrentToCart(){
-  if(cur.colors&&cur.colors.length&&!selectedColor){alert("Please select a colour before adding to cart.");return}
+  const designVariants=(cur.colorVariants||[]).filter(v=>v.type==="design"&&v.image);
+  const colorVariants=(cur.colorVariants||[]).filter(v=>v.type!=="design"&&v.color);
+  const hasLegacyColors=!designVariants.length&&(cur.colors||[]).length>0&&!colorVariants.length;
+  if(designVariants.length&&!selectedDesign){alert("Please select a design before adding to cart.");return}
+  if((colorVariants.length||hasLegacyColors)&&!selectedColor){alert("Please select a colour before adding to cart.");return}
   if(cur.sizes&&cur.sizes.length&&!selectedSize){alert("Please select a size before adding to cart.");return}
-  const variantSuffix=[selectedColor,selectedSize].filter(Boolean).join("/");
+  const selectedVariant=selectedDesign||selectedColor;
+  const variantSuffix=[selectedVariant,selectedSize].filter(Boolean).join("/");
   const key=typ+"-"+cur.id+(variantSuffix?"-"+variantSuffix:"");
-  const displayName=cur.name+(variantSuffix?` (${[selectedColor,selectedSize].filter(Boolean).join(", ")})`:"");
+  const displayName=cur.name+(variantSuffix?` (${[selectedVariant,selectedSize].filter(Boolean).join(", ")})`:"");
+  const variantMatch=cur.colorVariants&&cur.colorVariants.find(v=>(v.type==="design"?v.design:v.color)===selectedVariant);
+  const cartImage=variantMatch?variantMatch.image:cur.image;
   const ex=cart.find(x=>x.key===key);
-  if(ex){ex.qty+=q}else{cart.push({key,typ,id:cur.id,name:displayName,price:cur.price,unit:cur.unit,qty:q,image:cur.image})}
+  if(ex){ex.qty+=q}else{cart.push({key,typ,id:cur.id,name:displayName,price:cur.price,unit:cur.unit,qty:q,image:cartImage})}
   updateCartUI();closeM();openCart();
 }
 function removeFromCart(key){cart=cart.filter(x=>x.key!==key);updateCartUI();renderCart()}
@@ -1259,8 +1372,24 @@ function makeOrderId(){
   return "RN-"+s+"-"+Math.random().toString(36).slice(2,7).toUpperCase();
 }
 async function fileToDataUrl(file){
-  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
+  if(!file)throw new Error("No image was selected.");
+  try{
+    const buffer=await file.arrayBuffer();
+    if(!buffer.byteLength)throw new Error("Empty file");
+    let binary="";const bytes=new Uint8Array(buffer);const chunk=0x8000;
+    for(let i=0;i<bytes.length;i+=chunk)binary+=String.fromCharCode(...bytes.subarray(i,i+chunk));
+    return `data:${file.type||"application/octet-stream"};base64,${btoa(binary)}`;
+  }catch(e){
+    try{
+      return await new Promise((resolve,reject)=>{
+        const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error("FileReader failed"));r.readAsDataURL(file);
+      });
+    }catch(e2){
+      throw new Error("Could not read the selected photo. Please choose a photo stored on your device and try again.");
+    }
+  }
 }
+
 // Compresses/resizes an image before upload so slow mobile connections don't stall on large screenshots
 async function compressImage(file,maxDim=1280,quality=0.72){
   try{
@@ -1299,10 +1428,13 @@ async function uploadProofToImgBB(file){
   const base64Data=base64.split(",")[1];
   const fd=new FormData();
   fd.append("key",IMGBB_API_KEY);fd.append("image",base64Data);fd.append("name","proof-"+Date.now());
-  const res=await fetch("https://api.imgbb.com/1/upload",{method:"POST",body:fd});
-  const json=await res.json();
-  if(json.success)return json.data.url;
-  throw new Error("ImgBB upload failed: "+JSON.stringify(json));
+  let res;
+  try{res=await fetch("https://api.imgbb.com/1/upload",{method:"POST",body:fd})}
+  catch(e){throw new Error("Could not connect to the image upload service. Please check your internet connection and try again.")}
+  const raw=await res.text();
+  let json=null;try{json=JSON.parse(raw)}catch(e){}
+  if(res.ok&&json&&json.success&&json.data&&json.data.url)return json.data.url;
+  throw new Error("ImgBB upload failed: "+(json&&json.error&&json.error.message?json.error.message:raw.slice(0,220)));
 }
 async function submitOrder(){
   const name=document.getElementById("customerName").value.trim();
@@ -1510,10 +1642,9 @@ const helpMsg=wa("Hello Romiluxe Ng, I need help finding a jewellery product. Pl
 renderGrid("retail","all");
 renderGrid("wholesale","all");
 updateCartUI();
-updateProductCounts();
-// Load any products the seller added via the admin page, then refresh the grids to include them.
-// Rendered separately (not awaited above) so the page still appears instantly for visitors.
+// All product data now lives in Supabase (single source of truth, edited via the admin page).
 loadDbProducts().then(()=>{
+  productsLoadedOnce=true;
   renderGrid("retail","all");
   renderGrid("wholesale","all");
   updateProductCounts();
