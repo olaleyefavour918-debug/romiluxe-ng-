@@ -1656,8 +1656,10 @@ async function submitOrder(){
   msg.textContent="Uploading your payment screenshot…";
 
   const orderId=makeOrderId();
-  const itemsList=cart.map(x=>`• ${x.name} — ${x.qty} ${x.unit} — ${money(x.price*x.qty)}`).join("\n");
-  const imageUrls=cart.map(x=>x.image).join("\n");
+  // Keep product images with the order so the admin can see exactly what was ordered.
+  // The image line is parsed by the admin and hidden from the customer's order summary.
+  const itemsList=cart.map(x=>`• ${x.name} — ${x.qty} ${x.unit} — ${money(x.price*x.qty)}\n  [Product image: ${x.image||""}]`).join("\n");
+  const imageUrls=cart.map(x=>x.image).filter(Boolean).join("\n");
   const orderDate=new Date().toLocaleString("en-NG",{dateStyle:"full",timeStyle:"short"});
 
   try{
