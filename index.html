@@ -450,6 +450,31 @@ footer{
 .detail-price-row{display:flex;align-items:baseline;gap:8px;margin-bottom:24px}
 .detail-price{font-size:28px;font-weight:600;color:var(--ink)}
 .detail-unit{font-size:14px;color:var(--muted)}
+.mix-modal{max-width:980px}
+.mix-head{padding-bottom:8px}.mix-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0}.mix-step{border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--surface2);font-size:11px;color:var(--muted)}.mix-step b{display:block;color:var(--ink);font-size:12px;margin-bottom:3px}
+.mix-group-list{display:grid;gap:16px;margin:18px 0 22px}
+.mix-product{border:1px solid var(--line);border-radius:18px;padding:14px;background:var(--surface2)}
+.mix-product-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.mix-product-head img{width:64px;height:64px;border-radius:12px;object-fit:cover;background:var(--warm)}
+.mix-product-name{font-weight:700;font-size:14px}
+.mix-product-price{font-size:12px;color:var(--muted);margin-top:3px}
+.mix-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mix-choice{display:grid;grid-template-columns:54px 1fr auto;align-items:center;gap:9px;border:1px solid var(--line);border-radius:13px;padding:8px;background:var(--paper);transition:border-color .18s,box-shadow .18s}.mix-choice:has(.mix-stepper span:not(:empty)){ }
+.mix-choice img{width:54px;height:54px;object-fit:cover;border-radius:9px}
+.mix-choice-name{font-size:12px;font-weight:700;min-width:0}
+.mix-choice-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.mix-stepper{display:flex;align-items:center;gap:6px}
+.mix-stepper button{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);cursor:pointer;font-weight:800;font-size:18px}.mix-stepper button:last-child{background:var(--ink);color:var(--white);border-color:var(--ink)}
+.mix-stepper span{min-width:18px;text-align:center;font-size:13px;font-weight:700}
+.mix-summary{position:sticky;bottom:0;background:var(--paper);border-top:1px solid var(--line);padding-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mix-summary>div{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.mix-summary>div span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}.mix-summary strong{font-variant-numeric:tabular-nums}
+.mix-summary>div strong{display:block;font-size:17px;margin-top:3px}
+.mix-rule{grid-column:1/-1;font-size:12px;color:var(--muted);line-height:1.5;margin:2px 0 4px}
+.mix-summary .add-cart-btn{grid-column:1/-1}
+.mix-disabled{opacity:.55}
+.detail-actions{display:grid;grid-template-columns:1fr;gap:9px;margin-top:8px}.detail-actions .add-cart-btn{margin-top:0}.detail-mix-btn{width:100%;padding:13px 16px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);border-radius:10px;font-weight:700;cursor:pointer}.detail-mix-btn:hover{background:var(--ink);color:var(--white)}
+@media(max-width:700px){.mix-choices{grid-template-columns:1fr}.mix-choice{grid-template-columns:52px 1fr auto}.mix-choice img{width:52px;height:52px}.mix-modal{padding:22px 16px}.mix-summary{grid-template-columns:1fr 1fr}.mix-steps{grid-template-columns:1fr}.mix-step{padding:8px 10px}}
 .qty-row{display:flex;align-items:center;gap:10px;margin-bottom:20px}
 .variant-group{margin-bottom:18px}
 .variant-label{font-size:11px;font-weight:700;color:var(--muted);margin-bottom:10px;letter-spacing:1.2px;text-transform:uppercase}
@@ -787,7 +812,7 @@ footer{
       <div class="section-eyebrow">Shop your way</div>
       <h2 class="section-title serif">Choose a <em>collection</em></h2>
     </div>
-    <p class="section-sub">Retail pricing for individual buyers. Wholesale pricing with minimum order quantities for business restocking.</p>
+    <p class="section-sub">Retail pricing for individual buyers. Wholesale buyers can mix designs within the same price group, with a 6-piece MOQ and ₦15,000 minimum wholesale checkout.</p>
   </div>
   <div class="chooser">
     <div class="chooser-card" onclick="go('retail')">
@@ -978,12 +1003,39 @@ footer{
           <button class="qty-btn" onclick="chg(1)">+</button>
         </div>
         <div id="tot" class="detail-total"></div>
-        <button class="add-cart-btn" onclick="addCurrentToCart()">Add to Cart</button>
+        <div class="detail-actions">
+          <button class="add-cart-btn" onclick="addCurrentToCart()">Add to Cart</button>
+          <button type="button" class="detail-mix-btn" id="detailMixBtn" onclick="openWholesaleMix(cur&&cur.id)" style="display:none">Mix & Match</button>
+        </div>
       </div>
     </div>
     <div class="similar-section">
       <h3 class="similar-title serif">You May Also Like</h3>
       <div id="sg" class="similar-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WHOLESALE MIX & MATCH MODAL -->
+<div id="wholesaleMixModal" class="modal">
+  <div class="modal-box mix-modal">
+    <button class="modal-close" onclick="closeWholesaleMix()">×</button>
+    <div class="mix-head">
+      <div class="detail-tag">WHOLESALE</div>
+      <h2 id="mixTitle" class="checkout-title serif">Choose your designs</h2>
+      <p id="mixIntro" class="checkout-sub"></p>
+      <div class="mix-steps">
+        <div class="mix-step"><b>1. Pick designs</b>Choose any designs you like.</div>
+        <div class="mix-step"><b>2. Set quantities</b>Use + and − for each design.</div>
+        <div class="mix-step"><b>3. Buy 6+</b>Reach at least 6 pieces to continue.</div>
+      </div>
+    </div>
+    <div id="mixGroupList" class="mix-group-list"></div>
+    <div class="mix-summary">
+      <div><span>Total pieces</span><strong id="mixPieces">0</strong></div>
+      <div><span>Estimated total</span><strong id="mixSubtotal">₦0</strong></div>
+      <p id="mixRule" class="mix-rule"></p>
+      <button class="add-cart-btn" id="mixAddBtn" onclick="addWholesaleMixToCart()">Add Selection to Cart</button>
     </div>
   </div>
 </div>
@@ -1106,22 +1158,30 @@ async function loadDbProducts(){
     D.retail=[];D.wholesale=[];
     rows.forEach(r=>{
       const cat=r.category==="wholesale"?"wholesale":"retail";
-      let colorVariants=[];
+      let colorVariants=[],mixMatch=false;
+      const isFakePiercingSticker=/fake\s*piercing\s*sticker/i.test(String(r.name||''));
+      // All wholesale products support Mix & Match by default, except the fake piercing sticker.
+      if(cat==="wholesale" && !isFakePiercingSticker) mixMatch=true;
       if(r.color_variants){
         try{
           const parsed=typeof r.color_variants==="string"?JSON.parse(r.color_variants):r.color_variants;
-          colorVariants=Array.isArray(parsed)?parsed.filter(v=>v&&v.image):[];
-        }catch(e){console.warn("Invalid product variants for",r.id,e);colorVariants=[]}
+          colorVariants=(Array.isArray(parsed)?parsed:(Array.isArray(parsed?.variants)?parsed.variants:[])).filter(v=>v&&v.image);
+          if(cat==="wholesale" && !isFakePiercingSticker){ mixMatch=true; }
+          else if(cat==="wholesale" && isFakePiercingSticker){ mixMatch=false; }
+          else { mixMatch=false; }
+        }catch(e){console.warn("Invalid product variants for",r.id,e);colorVariants=[];mixMatch=false}
       }
       const item={
         id:Number(r.id),
-        name:r.name,price:Number(r.price)||0,unit:r.unit||"piece",
+        name:r.name,price:Number(r.price)||0,
+        unit:cat==="wholesale"?"dozen":(r.unit||"piece"),
         image:r.image_url,
         description:r.description||"",
-        moq:cat==="wholesale"?(Number(r.moq)||1):undefined,
+        moq:cat==="wholesale"?6:undefined,
         contents:cat==="wholesale"?(r.contents||""):undefined,
         colors:colorVariants.filter(v=>v.type!=="design").map(v=>v.color).filter(Boolean).length?colorVariants.filter(v=>v.type!=="design").map(v=>v.color).filter(Boolean):(r.colors?String(r.colors).split(",").map(s=>s.trim()).filter(Boolean):[]),
         colorVariants,
+        mixMatch,
         sizes:r.sizes?String(r.sizes).split(",").map(s=>s.trim()).filter(Boolean):[]
       };
       D[cat].push(item);
@@ -1146,7 +1206,7 @@ function renderGrid(type,filter){
         <div class="product-type">${type}</div>
         <div class="product-name">${p.name}</div>
         <div class="product-price">${money(p.price)}<span style="font-size:13px;font-weight:400;color:var(--muted)">/${p.unit}</span></div>
-        <div class="product-meta">${type==="wholesale"?p.contents:"Individual retail item"}${p.colorVariants&&p.colorVariants.length?` · ${p.colorVariants.length} ${p.colorVariants.some(v=>v.type==="design")?"designs":"variants"}`:""}</div>
+        <div class="product-meta">${type==="wholesale"?(p.contents||"Mix & match wholesale pieces") :"Individual retail item"}${p.colorVariants&&p.colorVariants.length?` · ${p.colorVariants.length} ${p.colorVariants.some(v=>v.type==="design")?"designs":"variants"}`:""}</div>
         <button class="product-cta">Add to Cart</button>
       </div>
     </article>`).join("")||"<p style='color:var(--muted);padding:20px'>No products found.</p>";
@@ -1187,17 +1247,21 @@ function filterWholesale(f,btn){
 
 // PRODUCT MODAL
 function openP(t,id){
-  typ=t;cur=D[t].find(p=>p.id==id);q=t==="wholesale"?cur.moq:1;
+  typ=t;cur=D[t].find(p=>p.id==id);
+  if(!cur)return;
+  q=t==="wholesale"?WHOLESALE_MOQ:1;
   selectedColor=null;selectedDesign=null;selectedSize=null;
   document.getElementById("q").value=q;
   document.getElementById("di").src=cur.image;
   document.getElementById("dn").textContent=cur.name;
   document.getElementById("dt").textContent=t+" product";
   document.getElementById("dm").textContent=t==="wholesale"
-    ?cur.contents+". Minimum order: "+cur.moq+" "+cur.unit+(cur.moq>1?"s":"")
+    ?(cur.contents||"Wholesale pricing")+". Minimum order: "+WHOLESALE_MOQ+" pieces"
     :"Retail · Individual item";
   document.getElementById("dp").textContent=money(cur.price);
-  document.getElementById("du").textContent="/"+cur.unit;
+  document.getElementById("du").textContent=t==="wholesale"?"/dozen":"/"+cur.unit;
+  const detailMixBtn=document.getElementById("detailMixBtn");
+  if(detailMixBtn)detailMixBtn.style.display=t==="wholesale"&&cur.mixMatch?"block":"none";
   renderDescription();
   renderVariantPickers();
   updateDetail();
@@ -1224,7 +1288,7 @@ function renderVariantPickers(){
   const designs=(cur.colorVariants||[]).filter(v=>v.type==="design"&&v.image);
   const colors=(cur.colorVariants||[]).filter(v=>v.type!=="design"&&v.color);
   if(designs.length){
-    html+=`<div class="variant-group"><div class="variant-label">Choose a design <span class="variant-count">(${designs.length} available)</span></div><div class="variant-design-grid">
+    html+=`<div class="variant-group"><div class="variant-label">Choose a design <span class="variant-count">(${designs.length} available)</span></div><p class="checkout-sub" style="margin:4px 0 10px">Tap one design to see its photo, then add it to your cart.</p><div class="variant-design-grid">
       ${designs.map((v,i)=>`
         <button type="button" class="variant-design-card" onclick="selectDesignVariant('${String(v.design||('Design '+(i+1))).replace(/'/g,"\\'")}','${v.image}',this)">
           <img src="${v.image}" alt="${v.design||('Design '+(i+1))}">
@@ -1233,7 +1297,7 @@ function renderVariantPickers(){
     </div></div>`;
   }
   if(colors.length){
-    html+=`<div class="variant-group"><div class="variant-label">Choose a colour <span class="variant-count">(${colors.length} available)</span></div><div class="variant-options">
+    html+=`<div class="variant-group"><div class="variant-label">Choose a colour <span class="variant-count">(${colors.length} available)</span></div><p class="checkout-sub" style="margin:4px 0 10px">Tap one colour to see its photo.</p><div class="variant-options">
       ${colors.map(v=>`
         <button type="button" class="variant-swatch" onclick="selectColorVariant('${v.color.replace(/'/g,"\\'")}','${v.image}',this)">
           <img src="${v.image}" alt="${v.color}">
@@ -1283,7 +1347,94 @@ function selectVariant(kind,value,btn){
 function closeM(){document.getElementById("modal").classList.remove("open")}
 function setQ(v){q=Math.max(typ==="wholesale"?cur.moq:1,Math.floor(Number(v)||1));document.getElementById("q").value=q;updateDetail()}
 function chg(n){setQ(q+n)}
-function updateDetail(){document.getElementById("tot").textContent="Total: "+money(cur.price*q)}
+function updateDetail(){
+  const total=typ==="wholesale"?(Number(cur.price)/12)*q:Number(cur.price)*q;
+  document.getElementById("tot").textContent="Total: "+money(total);
+}
+
+// WHOLESALE MIX & MATCH
+const WHOLESALE_MOQ=6;
+const WHOLESALE_MIN_TOTAL=15000;
+let mixGroup=null,mixSelections={};
+function wholesaleGroupKey(p){return `${cat(p)}|${Number(p.price).toFixed(2)}`}
+function wholesalePackPieces(p){return 12}
+function wholesalePiecePrice(p){return Number(p.price)/wholesalePackPieces(p)}
+function wholesaleVariants(p){
+  const vs=(p.colorVariants||[]).filter(v=>v&&v.image);
+  if(vs.length)return vs.map((v,i)=>({
+    key:`${p.id}-${v.type||'color'}-${v.design||v.color||i}`,
+    productId:p.id,productName:p.name,
+    label:v.type==="design"?(v.design||`Design ${i+1}`):(v.color||`Colour ${i+1}`),
+    image:v.image
+  }));
+  return [{key:`${p.id}-base`,productId:p.id,productName:p.name,label:"Main design",image:p.image}];
+}
+function openWholesaleMix(id){
+  const selected=D.wholesale.find(p=>p.id==id);
+  if(!selected)return;
+  if(!selected.mixMatch){alert("Mix & Match is not available for this product.");return}
+  mixGroup=wholesaleGroupKey(selected);
+  mixSelections={};
+  const group=D.wholesale.filter(p=>wholesaleGroupKey(p)===mixGroup&&cat(p)===cat(selected)&&p.mixMatch);
+  document.getElementById("mixTitle").textContent=`Choose your designs · ${money(selected.price)} per dozen`;
+  document.getElementById("mixIntro").textContent=`Choose any combination from the Mix & Match products in this ${money(selected.price)}-per-dozen price group. You can mix the designs, but you cannot mix different wholesale prices.`;
+  const list=document.getElementById("mixGroupList");
+  list.innerHTML=group.map(p=>{
+    const variants=wholesaleVariants(p);
+    return `<div class="mix-product"><div class="mix-product-head"><img src="${p.image}" alt="${p.name}"><div><div class="mix-product-name">${p.name}</div><div class="mix-product-price">${money(p.price)} per dozen · ${money(wholesalePiecePrice(p))} per piece</div></div></div><div class="mix-choices">${variants.map(v=>{mixSelections[v.key]=0;return `<div class="mix-choice"><img src="${v.image}" alt="${v.label}"><div><div class="mix-choice-name">${v.label}</div><div class="mix-choice-sub">Add pieces of this design</div></div><div class="mix-stepper"><button type="button" onclick="changeMixQty('${escAttr(v.key)}',-1)">−</button><span id="mixq-${cssKey(v.key)}">0</span><button type="button" onclick="changeMixQty('${escAttr(v.key)}',1)">+</button></div></div>`}).join("")}</div></div>`;
+  }).join("");
+  updateMixSummary();
+  document.getElementById("wholesaleMixModal").classList.add("open");
+}
+function escAttr(s){return String(s).replace(/\\/g,"\\\\").replace(/'/g,"\\'")}
+function cssKey(s){return String(s).replace(/[^a-zA-Z0-9_-]/g,"_")}
+function changeMixQty(key,delta){
+  if(!(key in mixSelections))return;
+  mixSelections[key]=Math.max(0,(mixSelections[key]||0)+delta);
+  const el=document.getElementById("mixq-"+cssKey(key));if(el)el.textContent=mixSelections[key];
+  updateMixSummary();
+}
+function mixPieces(){return Object.values(mixSelections).reduce((a,b)=>a+b,0)}
+function mixSubtotal(){
+  if(!mixGroup)return 0;
+  const price=Number(mixGroup.split("|")[1]);
+  return mixPieces()*(price/12);
+}
+function updateMixSummary(){
+  const pieces=mixPieces(),subtotal=mixSubtotal();
+  document.getElementById("mixPieces").textContent=pieces;
+  document.getElementById("mixSubtotal").textContent=money(subtotal);
+  const rule=document.getElementById("mixRule");
+  if(pieces<WHOLESALE_MOQ){rule.textContent=`Choose ${WHOLESALE_MOQ} or more pieces to add this selection to your cart.`}
+  else if(subtotal<WHOLESALE_MIN_TOTAL){rule.textContent=`✓ ${pieces} pieces selected. You can add this to your cart now. Checkout unlocks when your wholesale subtotal reaches ${money(WHOLESALE_MIN_TOTAL)}.`}
+  else{rule.textContent=`✓ ${pieces} pieces selected. Your wholesale selection is ready for checkout.`}
+}
+function closeWholesaleMix(){document.getElementById("wholesaleMixModal").classList.remove("open")}
+function addWholesaleMixToCart(){
+  const pieces=mixPieces(),subtotal=mixSubtotal();
+  // Customers may add a valid 6+ piece wholesale selection to the cart even
+  // when its value is below ₦15,000. The ₦15,000 rule is a CHECKOUT rule.
+  if(pieces<WHOLESALE_MOQ){alert(`Please select at least ${WHOLESALE_MOQ} pieces before adding to cart.`);return}
+  const existingWholesaleGroups=[...new Set(cart.filter(x=>x.typ==="wholesale").map(x=>x.wholesaleGroup||"legacy"))];
+  if(existingWholesaleGroups.length&&(!existingWholesaleGroups.includes(mixGroup)||existingWholesaleGroups.length>1)){
+    alert("You already have a different wholesale price group in your cart. Different wholesale price groups cannot be mixed in one order.");
+    return;
+  }
+  const groupProducts=D.wholesale.filter(p=>wholesaleGroupKey(p)===mixGroup);
+  const price=Number(mixGroup.split("|")[1]);
+  Object.entries(mixSelections).forEach(([key,qty])=>{
+    if(!qty)return;
+    const productId=Number(key.split("-")[0]);
+    const p=groupProducts.find(x=>x.id===productId);if(!p)return;
+    const v=wholesaleVariants(p).find(x=>x.key===key);if(!v)return;
+    const cartKey=`wholesale-mix-${mixGroup}-${key}`;
+    const displayName=`${p.name} (${v.label})`;
+    const ex=cart.find(x=>x.key===cartKey);
+    if(ex)ex.qty+=qty;
+    else cart.push({key:cartKey,typ:"wholesale",id:p.id,name:displayName,price:price/12,unit:"piece",qty,image:v.image,wholesaleGroup:mixGroup});
+  });
+  updateCartUI();closeWholesaleMix();openCart();
+}
 
 // CART
 function addCurrentToCart(){
@@ -1293,21 +1444,35 @@ function addCurrentToCart(){
   if(designVariants.length&&!selectedDesign){alert("Please select a design before adding to cart.");return}
   if((colorVariants.length||hasLegacyColors)&&!selectedColor){alert("Please select a colour before adding to cart.");return}
   if(cur.sizes&&cur.sizes.length&&!selectedSize){alert("Please select a size before adding to cart.");return}
+  if(typ==="wholesale"&&q<WHOLESALE_MOQ){alert(`Wholesale products require at least ${WHOLESALE_MOQ} pieces.`);return}
   const selectedVariant=selectedDesign||selectedColor;
   const variantSuffix=[selectedVariant,selectedSize].filter(Boolean).join("/");
   const key=typ+"-"+cur.id+(variantSuffix?"-"+variantSuffix:"");
   const displayName=cur.name+(variantSuffix?` (${[selectedVariant,selectedSize].filter(Boolean).join(", ")})`:"");
   const variantMatch=cur.colorVariants&&cur.colorVariants.find(v=>(v.type==="design"?v.design:v.color)===selectedVariant);
   const cartImage=variantMatch?variantMatch.image:cur.image;
+  const cartPrice=typ==="wholesale"?Number(cur.price)/12:Number(cur.price);
+  const cartUnit=typ==="wholesale"?"piece":cur.unit;
+  const wholesaleGroup=typ==="wholesale"?wholesaleGroupKey(cur):null;
+  if(typ==="wholesale"){
+    const groups=[...new Set(cart.filter(x=>x.typ==="wholesale").map(x=>x.wholesaleGroup||"legacy"))];
+    if(groups.length&&(!groups.includes(wholesaleGroup)||groups.length>1)){alert("Different wholesale price groups cannot be mixed in one order.");return}
+  }
   const ex=cart.find(x=>x.key===key);
-  if(ex){ex.qty+=q}else{cart.push({key,typ,id:cur.id,name:displayName,price:cur.price,unit:cur.unit,qty:q,image:cartImage})}
+  if(ex)ex.qty+=q;
+  else cart.push({key,typ,id:cur.id,name:displayName,price:cartPrice,unit:cartUnit,qty:q,image:cartImage,wholesaleGroup});
   updateCartUI();closeM();openCart();
 }
 function removeFromCart(key){cart=cart.filter(x=>x.key!==key);updateCartUI();renderCart()}
 function changeCartQty(key,delta){
   const item=cart.find(x=>x.key===key);if(!item)return;
   const prod=D[item.typ].find(p=>p.id===item.id);
-  item.qty=Math.max(item.typ==="wholesale"?prod.moq:1,item.qty+delta);
+  if(item.typ==="wholesale"&&item.wholesaleGroup){
+    item.qty=Math.max(0,item.qty+delta);
+    if(item.qty===0)cart=cart.filter(x=>x.key!==key);
+  }else{
+    item.qty=Math.max(item.typ==="wholesale"?(prod?.moq||WHOLESALE_MOQ):1,item.qty+delta);
+  }
   updateCartUI();renderCart();
 }
 function cartTotal(){return cart.reduce((s,x)=>s+x.price*x.qty,0)}
@@ -1344,7 +1509,24 @@ function renderCart(){
         </div>
       </div>
     </div>`).join("");
-  summary.innerHTML=`<strong class="cart-total">Total: ${money(cartTotal())}</strong><button class="btn-primary" onclick="startCheckout()">Proceed to Checkout →</button>`;
+  const wholesaleGroups={};
+  cart.filter(x=>x.typ==="wholesale").forEach(x=>{const g=x.wholesaleGroup||"legacy";wholesaleGroups[g]=(wholesaleGroups[g]||0)+x.qty*x.price});
+  const hasWholesale=Object.keys(wholesaleGroups).length>0;
+  const groupCount=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty,0);
+  const wholesaleSubtotal=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty*x.price,0);
+  let note=hasWholesale?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Wholesale: ${groupCount} pieces · ${money(wholesaleSubtotal)}. Minimum: ${WHOLESALE_MOQ} pieces and ${money(WHOLESALE_MIN_TOTAL)} wholesale subtotal. Retail items have no ₦15,000 minimum.</div>`:"";
+  const checkoutReady=(!hasWholesale)||(()=>{
+    const groups=[...new Set(cart.filter(x=>x.typ==="wholesale").map(x=>x.wholesaleGroup||"legacy"))];
+    const pieces=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty,0);
+    const subtotal=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty*x.price,0);
+    return groups.length===1&&pieces>=WHOLESALE_MOQ&&subtotal>=WHOLESALE_MIN_TOTAL;
+  })();
+  const checkoutButton=checkoutReady
+    ? `<button class="btn-primary" onclick="startCheckout()">Proceed to Checkout →</button>`
+    : hasWholesale
+      ? `<button class="btn-primary" onclick="startCheckout()">Proceed to Checkout →</button><div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center">Wholesale checkout unlocks at ${money(WHOLESALE_MIN_TOTAL)}. Your selection is safely saved in your cart.</div>`
+      : `<button class="btn-primary" onclick="startCheckout()">Proceed to Checkout →</button>`;
+  summary.innerHTML=note+`<strong class="cart-total">Total: ${money(cartTotal())}</strong>`+checkoutButton;
 }
 function openCart(){renderCart();document.getElementById("cartModal").classList.add("open")}
 function closeCart(){document.getElementById("cartModal").classList.remove("open")}
@@ -1352,6 +1534,15 @@ function closeCart(){document.getElementById("cartModal").classList.remove("open
 // CHECKOUT
 function startCheckout(){
   if(!cart.length)return;
+  const wholesaleItems=cart.filter(x=>x.typ==="wholesale");
+  if(wholesaleItems.length){
+    const groups=[...new Set(wholesaleItems.map(x=>x.wholesaleGroup||"legacy"))];
+    if(groups.length>1){alert("Wholesale products from different price groups cannot be mixed in one order. Please keep one wholesale price group per order.");return}
+    const pieces=wholesaleItems.reduce((s,x)=>s+x.qty,0);
+    const subtotal=wholesaleItems.reduce((s,x)=>s+x.qty*x.price,0);
+    if(pieces<WHOLESALE_MOQ){alert(`Wholesale orders require at least ${WHOLESALE_MOQ} pieces.`);return}
+    if(subtotal<WHOLESALE_MIN_TOTAL){alert(`Wholesale checkout requires a minimum subtotal of ${money(WHOLESALE_MIN_TOTAL)}.`);return}
+  }
   closeCart();
   document.getElementById("bankName").textContent=PAYMENT.bankName;
   document.getElementById("accountName").textContent=PAYMENT.accountName;
