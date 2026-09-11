@@ -342,6 +342,10 @@ h1,h2,h3,.logo-text{font-family:'Cormorant Garamond',Georgia,serif}
 .product-cta:hover{background:var(--gold)}
 .wholesale .product-cta{background:var(--gold)}
 .wholesale .product-cta:hover{background:var(--ink)}
+.perfume .product-cta{background:var(--rose)}
+.perfume .product-cta:hover{background:var(--ink)}
+.cosmetics .product-cta{background:var(--gold-light)}
+.cosmetics .product-cta:hover{background:var(--ink)}
 
 /* ── SERVICES ── */
 .services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
@@ -713,6 +717,8 @@ footer{
       <li><a href="#collections">Collections</a></li>
       <li><a href="#retail">Retail</a></li>
       <li><a href="#wholesale">Wholesale</a></li>
+      <li><a href="#perfumes">Perfumes</a></li>
+      <li><a href="#cosmetics">Cosmetics</a></li>
       <li><a href="#services">Services</a></li>
     </ul>
     <div class="nav-right">
@@ -778,6 +784,8 @@ footer{
     <span class="marquee-item">Accessories <span class="marquee-dot"></span></span>
     <span class="marquee-item">Retail <span class="marquee-dot"></span></span>
     <span class="marquee-item">Wholesale <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Perfumes <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Cosmetics <span class="marquee-dot"></span></span>
     <span class="marquee-item">Bangles <span class="marquee-dot"></span></span>
     <span class="marquee-item">Necklaces <span class="marquee-dot"></span></span>
     <span class="marquee-item">Earrings <span class="marquee-dot"></span></span>
@@ -788,6 +796,8 @@ footer{
     <span class="marquee-item">Accessories <span class="marquee-dot"></span></span>
     <span class="marquee-item">Retail <span class="marquee-dot"></span></span>
     <span class="marquee-item">Wholesale <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Perfumes <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Cosmetics <span class="marquee-dot"></span></span>
     <span class="marquee-item">Bangles <span class="marquee-dot"></span></span>
     <span class="marquee-item">Necklaces <span class="marquee-dot"></span></span>
     <span class="marquee-item">Earrings <span class="marquee-dot"></span></span>
@@ -828,6 +838,22 @@ footer{
         <div class="chooser-label">Wholesale</div>
         <h3 class="chooser-title serif">Bulk orders<br>by pack & dozen</h3>
         <p class="chooser-desc"><span id="chooserWholesaleCount">15</span> wholesale lines with minimum order quantities. Ideal for resellers and business buyers.</p>
+        <span class="chooser-arrow">→</span>
+      </div>
+    </div>
+    <div class="chooser-card" onclick="go('perfumes')">
+      <div class="chooser-card-inner">
+        <div class="chooser-label">Perfumes</div>
+        <h3 class="chooser-title serif">Fragrances for<br>every occasion</h3>
+        <p class="chooser-desc">Browse <span id="chooserPerfumeCount">0</span> perfume products. New arrivals coming soon.</p>
+        <span class="chooser-arrow">→</span>
+      </div>
+    </div>
+    <div class="chooser-card" onclick="go('cosmetics')">
+      <div class="chooser-card-inner">
+        <div class="chooser-label">Cosmetics</div>
+        <h3 class="chooser-title serif">Beauty essentials<br>you'll love</h3>
+        <p class="chooser-desc">Browse <span id="chooserCosmeticsCount">0</span> cosmetics products. New arrivals coming soon.</p>
         <span class="chooser-arrow">→</span>
       </div>
     </div>
@@ -882,6 +908,30 @@ footer{
     <button class="filter-btn" data-f="other" onclick="filterWholesale('other',this)">Other</button>
   </div>
   <div id="wg" class="product-grid"></div>
+</section>
+
+<!-- PERFUMES -->
+<section class="section perfume" id="perfumes">
+  <div class="section-header section-row">
+    <div>
+      <div class="section-eyebrow"><span id="sectionPerfumeCount">0</span> products</div>
+      <h2 class="section-title serif">Perfume <em>Collection</em></h2>
+    </div>
+    <p class="section-sub">Fragrances for individual buyers, priced at retail.</p>
+  </div>
+  <div id="pg" class="product-grid"></div>
+</section>
+
+<!-- COSMETICS -->
+<section class="section cosmetics" id="cosmetics">
+  <div class="section-header section-row">
+    <div>
+      <div class="section-eyebrow"><span id="sectionCosmeticsCount">0</span> products</div>
+      <h2 class="section-title serif">Cosmetics <em>Collection</em></h2>
+    </div>
+    <p class="section-sub">Beauty essentials for individual buyers, priced at retail.</p>
+  </div>
+  <div id="cg" class="product-grid"></div>
 </section>
 
 <!-- SERVICES -->
@@ -959,6 +1009,8 @@ footer{
         <h4>Collections</h4>
         <a href="#retail">Retail Collection</a>
         <a href="#wholesale">Wholesale Collection</a>
+        <a href="#perfumes">Perfume Collection</a>
+        <a href="#cosmetics">Cosmetics Collection</a>
       </div>
       <div class="footer-col">
         <h4>Navigate</h4>
@@ -1124,7 +1176,9 @@ footer{
 </button>
 
 <script>
-let D={retail:[],wholesale:[]}; // populated live from Supabase — see loadDbProducts()
+let D={retail:[],wholesale:[],perfume:[],cosmetics:[]}; // populated live from Supabase — see loadDbProducts()
+const PRODUCT_TYPES=["retail","wholesale","perfume","cosmetics"];
+const TYPE_LABELS={retail:"Retail",wholesale:"Wholesale",perfume:"Perfume",cosmetics:"Cosmetics"};
 
 const WA="2349152313648";
 const EMAILJS_SERVICE_ID="service_romiluxe";
@@ -1143,9 +1197,11 @@ const wa=t=>"https://wa.me/"+WA+"?text="+encodeURIComponent(t);
 
 // RENDER PRODUCTS
 function updateProductCounts(){
-  const r=D.retail.length,w=D.wholesale.length;
+  const r=D.retail.length,w=D.wholesale.length,p=D.perfume.length,c=D.cosmetics.length;
   ["heroRetailCount","chooserRetailCount","sectionRetailCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=r});
   ["heroWholesaleCount","chooserWholesaleCount","sectionWholesaleCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=w});
+  ["chooserPerfumeCount","sectionPerfumeCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=p});
+  ["chooserCosmeticsCount","sectionCosmeticsCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=c});
 }
 async function loadDbProducts(){
   try{
@@ -1155,9 +1211,9 @@ async function loadDbProducts(){
     if(!res.ok)throw new Error("Fetch failed: "+res.status);
     const rows=await res.json();
     if(!Array.isArray(rows))throw new Error("Unexpected response");
-    D.retail=[];D.wholesale=[];
+    D.retail=[];D.wholesale=[];D.perfume=[];D.cosmetics=[];
     rows.forEach(r=>{
-      const cat=r.category==="wholesale"?"wholesale":"retail";
+      const cat=PRODUCT_TYPES.includes(r.category)?r.category:"retail";
       let colorVariants=[],mixMatch=false;
       const isFakePiercingSticker=/fake\s*piercing\s*sticker/i.test(String(r.name||''));
       // All wholesale products support Mix & Match by default, except the fake piercing sticker.
@@ -1203,10 +1259,10 @@ function renderGrid(type,filter){
     <article class="product-card" onclick="openP('${type}',${p.id})">
       <div class="product-img"><img src="${p.image}" loading="lazy" alt="${p.name}"></div>
       <div class="product-body">
-        <div class="product-type">${type}</div>
+        <div class="product-type">${TYPE_LABELS[type]||type}</div>
         <div class="product-name">${p.name}</div>
         <div class="product-price">${money(p.price)}<span style="font-size:13px;font-weight:400;color:var(--muted)">/${p.unit}</span></div>
-        <div class="product-meta">${type==="wholesale"?(p.contents||"Mix & match wholesale pieces") :"Individual retail item"}${p.colorVariants&&p.colorVariants.length?` · ${p.colorVariants.length} ${p.colorVariants.some(v=>v.type==="design")?"designs":"variants"}`:""}</div>
+        <div class="product-meta">${type==="wholesale"?(p.contents||"Mix & match wholesale pieces") :`Individual ${(TYPE_LABELS[type]||"retail").toLowerCase()} item`}${p.colorVariants&&p.colorVariants.length?` · ${p.colorVariants.length} ${p.colorVariants.some(v=>v.type==="design")?"designs":"variants"}`:""}</div>
         <button class="product-cta">Add to Cart</button>
       </div>
     </article>`).join("")||"<p style='color:var(--muted);padding:20px'>No products found.</p>";
@@ -1257,7 +1313,7 @@ function openP(t,id){
   document.getElementById("dt").textContent=t+" product";
   document.getElementById("dm").textContent=t==="wholesale"
     ?(cur.contents||"Wholesale pricing")+". Minimum order: "+WHOLESALE_MOQ+" pieces"
-    :"Retail · Individual item";
+    :(TYPE_LABELS[t]||"Retail")+" · Individual item";
   document.getElementById("dp").textContent=money(cur.price);
   document.getElementById("du").textContent=t==="wholesale"?"/dozen":"/"+cur.unit;
   const detailMixBtn=document.getElementById("detailMixBtn");
@@ -1498,7 +1554,7 @@ function renderCart(){
       <img src="${x.image}" alt="${x.name}">
       <div>
         <div class="cart-item-name">${x.name}</div>
-        <div class="cart-item-meta">${x.typ==="wholesale"?"Wholesale":"Retail"} · ${x.qty} ${x.unit}${x.qty!==1?"s":""} × ${money(x.price)}</div>
+        <div class="cart-item-meta">${TYPE_LABELS[x.typ]||"Retail"} · ${x.qty} ${x.unit}${x.qty!==1?"s":""} × ${money(x.price)}</div>
         <button class="cart-remove" onclick="removeFromCart('${x.key}')">Remove</button>
       </div>
       <div>
@@ -1658,7 +1714,7 @@ async function submitOrder(){
   const orderId=makeOrderId();
   // Keep product images with the order so the admin can see exactly what was ordered.
   // The image line is parsed by the admin and hidden from the customer's order summary.
-  const itemsList=cart.map(x=>`• ${x.name} — ${x.qty} ${x.unit} — ${money(x.price*x.qty)}\n  [Product image: ${x.image||""}]`).join("\n");
+  const itemsList=cart.map(x=>`• [${TYPE_LABELS[x.typ]||"Retail"}] ${x.name} — ${x.qty} ${x.unit} — ${money(x.price*x.qty)}\n  [Product image: ${x.image||""}]`).join("\n");
   const imageUrls=cart.map(x=>x.image).filter(Boolean).join("\n");
   const orderDate=new Date().toLocaleString("en-NG",{dateStyle:"full",timeStyle:"short"});
 
@@ -1834,12 +1890,16 @@ const helpMsg=wa("Hello Romiluxe Ng, I need help finding a jewellery product. Pl
 ["topwa","seller","servicewa"].forEach(id=>{const el=document.getElementById(id);if(el)el.href=helpMsg});
 renderGrid("retail","all");
 renderGrid("wholesale","all");
+renderGrid("perfume","all");
+renderGrid("cosmetics","all");
 updateCartUI();
 // All product data now lives in Supabase (single source of truth, edited via the admin page).
 loadDbProducts().then(()=>{
   productsLoadedOnce=true;
   renderGrid("retail","all");
   renderGrid("wholesale","all");
+  renderGrid("perfume","all");
+  renderGrid("cosmetics","all");
   updateProductCounts();
 });
 
