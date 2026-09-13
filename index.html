@@ -1722,28 +1722,33 @@ async function submitOrder(){
   try{
     const compressed=await compressImage(proofFile);
     const proofImageUrl=await uploadProofToImgBB(compressed);
-    btn.textContent="Sending order…";msg.textContent="Sending your order…";
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-    await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
-      to_email:"midelawal1701@gmail.com",
-      order_id:orderId,order_date:orderDate,
-      customer_name:name,customer_phone:phone,
-      customer_email:email,customer_address:address,customer_city:city,
-      order_items:itemsList,order_total:money(cartTotal()),
-      product_images:imageUrls,
-      payment_bank:PAYMENT.bankName,payment_account:PAYMENT.accountNumber,payment_name:PAYMENT.accountName,
-      proof_of_payment:proofImageUrl
+    btn.textContent="Saving order…";msg.textContent="Saving your order…";
+    // Save to Supabase FIRST — this is the source of truth for the order and must succeed.
+    // Sending the notification email is done afterwards as a best-effort step: if the
+    // seller's email quota is used up or EmailJS is briefly down, the order itself is
+    // still safely recorded and visible in the admin Orders tab either way.
+    await saveOrderToSupabase({
+      order_id:orderId,customer_name:name,phone:digits,email:email,
+      address:address,city:city,products:itemsList,total:money(cartTotal()),
+      shipping_fee:"To be confirmed by seller",proof_of_payment:proofImageUrl
     });
     try{
-      await saveOrderToSupabase({
-        order_id:orderId,customer_name:name,phone:digits,email:email,
-        address:address,city:city,products:itemsList,total:money(cartTotal()),
-        shipping_fee:"To be confirmed by seller",proof_of_payment:proofImageUrl
+      btn.textContent="Sending order…";msg.textContent="Sending your order…";
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+      await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+        to_email:"midelawal1701@gmail.com",
+        order_id:orderId,order_date:orderDate,
+        customer_name:name,customer_phone:phone,
+        customer_email:email,customer_address:address,customer_city:city,
+        order_items:itemsList,order_total:money(cartTotal()),
+        product_images:imageUrls,
+        payment_bank:PAYMENT.bankName,payment_account:PAYMENT.accountNumber,payment_name:PAYMENT.accountName,
+        proof_of_payment:proofImageUrl
       });
-    }catch(supaErr){
-      // The order email already went through to the seller, so the order is not lost —
-      // just log this so it's visible in browser console for debugging if it ever happens.
-      console.error("Order emailed successfully but tracking record failed to save:",supaErr);
+    }catch(emailErr){
+      // The order is already safely saved to Supabase, so the customer's order is not lost —
+      // just log this so it's visible in browser console for debugging (e.g. quota reached).
+      console.error("Order saved successfully but notification email failed to send:",emailErr);
     }
     rememberOrderLocally(orderId);
     cart=[];updateCartUI();closeCheckout();
