@@ -1733,37 +1733,46 @@ async function submitOrder(){
       shipping_fee:"To be confirmed by seller",proof_of_payment:proofImageUrl
     });
     try{
+      // Try EmailJS first (the original, already-set-up sender). Only if it fails —
+      // most commonly because its 200/month free limit has been used up for the month —
+      // do we fall back to the Resend-powered function (3,000/month) as a second attempt.
+      // Either way, the order itself is already safely saved above, so this never blocks
+      // order completion even if both attempts fail.
       btn.textContent="Sending order…";msg.textContent="Sending your order…";
-      emailjs.init(EMAILJS_PUBLIC_KEY);
-      await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
-        to_email:"midelawal1701@gmail.com",
-        order_id:orderId,order_date:orderDate,
-        customer_name:name,customer_phone:phone,
-        customer_email:email,customer_address:address,customer_city:city,
-        order_items:itemsList,order_total:money(cartTotal()),
-        product_images:imageUrls,
-        payment_bank:PAYMENT.bankName,payment_account:PAYMENT.accountNumber,payment_name:PAYMENT.accountName,
-        proof_of_payment:proofImageUrl
-      });
+      try{
+        emailjs.init(EMAILJS_PUBLIC_KEY);
+        await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{
+          to_email:"midelawal1701@gmail.com",
+          order_id:orderId,order_date:orderDate,
+          customer_name:name,customer_phone:phone,
+          customer_email:email,customer_address:address,customer_city:city,
+          order_items:itemsList,order_total:money(cartTotal()),
+          product_images:imageUrls,
+          payment_bank:PAYMENT.bankName,payment_account:PAYMENT.accountNumber,payment_name:PAYMENT.accountName,
+          proof_of_payment:proofImageUrl
+        });
+      }catch(emailJsErr){
+        console.error("EmailJS failed (likely monthly limit reached) — falling back to Resend:",emailJsErr);
+        await fetch("https://crrtunosemhnmiaquevn.supabase.co/functions/v1/send-order-email",{
+          method:"POST",
+          headers:{
+            "Content-Type":"application/json",
+            "x-webhook-secret":"a706d511f4607223970be571316aa0f0c7d64ed755024ddf"
+          },
+          body:JSON.stringify({
+            order_id:orderId,order_date:orderDate,
+            customer_name:name,customer_phone:phone,
+            customer_email:email,customer_address:address,customer_city:city,
+            order_items:itemsList,order_total:money(cartTotal()),
+            payment_bank:PAYMENT.bankName,payment_account:PAYMENT.accountNumber,payment_name:PAYMENT.accountName,
+            proof_of_payment:proofImageUrl
+          })
+        });
+      }
     }catch(emailErr){
       // The order is already safely saved to Supabase, so the customer's order is not lost —
-      // just log this so it's visible in browser console for debugging (e.g. quota reached).
-      console.error("Order saved successfully but notification email failed to send:",emailErr);
-    }
-    try{
-      // Best-effort: ping the notify-new-order function directly (rather than relying on a
-      // database-level webhook, which this project's Supabase instance doesn't support) so
-      // the seller's admin device gets a push notification. Never blocks order completion.
-      await fetch("https://crrtunosemhnmiaquevn.supabase.co/functions/v1/notify-new-order",{
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "x-webhook-secret":"52699a3602022b98d513a25609e0c47eeb82427296799070"
-        },
-        body:JSON.stringify({record:{customer_name:name,total:money(cartTotal())}})
-      });
-    }catch(pushErr){
-      console.error("Order saved successfully but push notification failed to send:",pushErr);
+      // just log this so it's visible in browser console for debugging.
+      console.error("Order saved successfully but both email attempts failed to send:",emailErr);
     }
     rememberOrderLocally(orderId);
     cart=[];updateCartUI();closeCheckout();
