@@ -1750,6 +1750,21 @@ async function submitOrder(){
       // just log this so it's visible in browser console for debugging (e.g. quota reached).
       console.error("Order saved successfully but notification email failed to send:",emailErr);
     }
+    try{
+      // Best-effort: ping the notify-new-order function directly (rather than relying on a
+      // database-level webhook, which this project's Supabase instance doesn't support) so
+      // the seller's admin device gets a push notification. Never blocks order completion.
+      await fetch("https://crrtunosemhnmiaquevn.supabase.co/functions/v1/notify-new-order",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-webhook-secret":"52699a3602022b98d513a25609e0c47eeb82427296799070"
+        },
+        body:JSON.stringify({record:{customer_name:name,total:money(cartTotal())}})
+      });
+    }catch(pushErr){
+      console.error("Order saved successfully but push notification failed to send:",pushErr);
+    }
     rememberOrderLocally(orderId);
     cart=[];updateCartUI();closeCheckout();
     document.getElementById("successRef").textContent="Order Ref: "+orderId;
