@@ -1472,7 +1472,9 @@ function addWholesaleMixToCart(){
   // Customers may add a valid 6+ piece wholesale selection to the cart even
   // when its value is below ₦15,000. The ₦15,000 rule is a CHECKOUT rule.
   if(pieces<WHOLESALE_MOQ){alert(`Please select at least ${WHOLESALE_MOQ} pieces before adding to cart.`);return}
-  const existingWholesaleGroups=[...new Set(cart.filter(x=>x.typ==="wholesale").map(x=>x.wholesaleGroup||"legacy"))];
+  // Only compare against other Mix & Match selections already in the cart — individually-added
+  // wholesale products (different feature, different rule) shouldn't block a valid mix purchase.
+  const existingWholesaleGroups=[...new Set(cart.filter(x=>x.typ==="wholesale"&&x.key.startsWith("wholesale-mix-")).map(x=>x.wholesaleGroup||"legacy"))];
   if(existingWholesaleGroups.length&&(!existingWholesaleGroups.includes(mixGroup)||existingWholesaleGroups.length>1)){
     alert("You already have a different wholesale price group in your cart. Different wholesale price groups cannot be mixed in one order.");
     return;
@@ -1511,10 +1513,10 @@ function addCurrentToCart(){
   const cartPrice=typ==="wholesale"?Number(cur.price)/12:Number(cur.price);
   const cartUnit=typ==="wholesale"?"piece":cur.unit;
   const wholesaleGroup=typ==="wholesale"?wholesaleGroupKey(cur):null;
-  if(typ==="wholesale"){
-    const groups=[...new Set(cart.filter(x=>x.typ==="wholesale").map(x=>x.wholesaleGroup||"legacy"))];
-    if(groups.length&&(!groups.includes(wholesaleGroup)||groups.length>1)){alert("Different wholesale price groups cannot be mixed in one order.");return}
-  }
+  // Note: individually-added wholesale products (each already meeting its own MOQ on its
+  // own product page) are free to mix different price groups in the same cart/order.
+  // The "can't mix price groups" rule applies only within the Mix & Match tool itself,
+  // where multiple products are pooled together under one shared averaged price.
   const ex=cart.find(x=>x.key===key);
   if(ex)ex.qty+=q;
   else cart.push({key,typ,id:cur.id,name:displayName,price:cartPrice,unit:cartUnit,qty:q,image:cartImage,wholesaleGroup});
