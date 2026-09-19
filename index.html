@@ -1575,10 +1575,9 @@ function renderCart(){
   const wholesaleSubtotal=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty*x.price,0);
   let note=hasWholesale?`<div style="font-size:12px;color:var(--muted);margin-bottom:10px">Wholesale: ${groupCount} pieces · ${money(wholesaleSubtotal)}. Minimum: ${WHOLESALE_MOQ} pieces and ${money(WHOLESALE_MIN_TOTAL)} wholesale subtotal. Retail items have no ₦15,000 minimum.</div>`:"";
   const checkoutReady=(!hasWholesale)||(()=>{
-    const groups=[...new Set(cart.filter(x=>x.typ==="wholesale").map(x=>x.wholesaleGroup||"legacy"))];
     const pieces=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty,0);
     const subtotal=cart.filter(x=>x.typ==="wholesale").reduce((s,x)=>s+x.qty*x.price,0);
-    return groups.length===1&&pieces>=WHOLESALE_MOQ&&subtotal>=WHOLESALE_MIN_TOTAL;
+    return pieces>=WHOLESALE_MOQ&&subtotal>=WHOLESALE_MIN_TOTAL;
   })();
   const checkoutButton=checkoutReady
     ? `<button class="btn-primary" onclick="startCheckout()">Proceed to Checkout →</button>`
@@ -1595,8 +1594,9 @@ function startCheckout(){
   if(!cart.length)return;
   const wholesaleItems=cart.filter(x=>x.typ==="wholesale");
   if(wholesaleItems.length){
-    const groups=[...new Set(wholesaleItems.map(x=>x.wholesaleGroup||"legacy"))];
-    if(groups.length>1){alert("Wholesale products from different price groups cannot be mixed in one order. Please keep one wholesale price group per order.");return}
+    // Wholesale price groups can now be freely mixed all the way through checkout —
+    // pieces and subtotal below are the combined total across every wholesale item
+    // in the cart, regardless of which price group each one belongs to.
     const pieces=wholesaleItems.reduce((s,x)=>s+x.qty,0);
     const subtotal=wholesaleItems.reduce((s,x)=>s+x.qty*x.price,0);
     if(pieces<WHOLESALE_MOQ){alert(`Wholesale orders require at least ${WHOLESALE_MOQ} pieces.`);return}
