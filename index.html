@@ -1264,6 +1264,10 @@ function applyProductRows(rows){
         try{
           const parsed=typeof r.color_variants==="string"?JSON.parse(r.color_variants):r.color_variants;
           colorVariants=(Array.isArray(parsed)?parsed:(Array.isArray(parsed?.variants)?parsed.variants:[])).filter(v=>v&&v.image);
+          // Several photos can share a name (e.g. five "Silver" bracelets). Number the repeats so each
+          // one can be picked on its own and always shows its own photo.
+          const seen={};
+          colorVariants.forEach(v=>{const k=v.type==="design"?"design":"color";const nm=String(v[k]||"").trim();if(!nm)return;const id=k+"|"+nm.toLowerCase();seen[id]=(seen[id]||0)+1;if(seen[id]>1)v[k]=nm+" "+seen[id]});
           if(cat==="wholesale" && !isFakePiercingSticker){ mixMatch=true; }
           else if(cat==="wholesale" && isFakePiercingSticker){ mixMatch=false; }
           else { mixMatch=false; }
@@ -1459,7 +1463,7 @@ function wholesalePiecePrice(p){return Number(p.price)/wholesalePackPieces(p)}
 function wholesaleVariants(p){
   const vs=(p.colorVariants||[]).filter(v=>v&&v.image);
   if(vs.length)return vs.map((v,i)=>({
-    key:`${p.id}-${v.type||'color'}-${v.design||v.color||i}`,
+    key:`${p.id}-${v.type||'color'}-${i}`,
     productId:p.id,productName:p.name,
     label:v.type==="design"?(v.design||`Design ${i+1}`):(v.color||`Colour ${i+1}`),
     image:v.image
