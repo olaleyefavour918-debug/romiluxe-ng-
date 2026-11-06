@@ -1196,11 +1196,29 @@ const cat=p=>{let s=p.name.toLowerCase();if(s.includes("necklace"))return"neckla
 const wa=t=>"https://wa.me/"+WA+"?text="+encodeURIComponent(t);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 // Product photo tag: small thumbnail for lists (falls back to the full photo if the thumbnail is missing).
-const imgTag=(url,alt,extra="")=>`<img src="${esc(thumbUrl(url))}" data-full="${esc(url)}" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="imgFallback(this)" ${extra}>`;
+const WM={enabled:false,map:{}};      // watermark settings + {originalUrl:{w:watermarkedUrl,x:excluded}}
+const WM_REV={};                      // watermarkedUrl -> originalUrl (used if a watermarked copy fails to load)
+const wmu=u=>{
+  if(!u||!WM.enabled)return u;
+  const r=WM.map[u];
+  if(r&&r.w&&!r.x){WM_REV[r.w]=u;return r.w}
+  return u;
+};
+const imgTag=(url,alt,extra="")=>`<img src="${esc(thumbUrl(url))}" data-full="${esc(url)}" data-orig="${esc(WM_REV[url]||"")}" alt="${esc(alt)}" loading="lazy" decoding="async" onerror="imgFallback(this)" ${extra}>`;
+const IMG_PLACEHOLDER="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 120 120%27%3E%3Crect width=%27120%27 height=%27120%27 fill=%27%23eee%27/%3E%3Ctext x=%2760%27 y=%2766%27 font-size=%2711%27 text-anchor=%27middle%27 fill=%27%23999%27 font-family=%27sans-serif%27%3EPhoto unavailable%3C/text%3E%3C/svg%3E";
 function imgFallback(img){
-  const full=img.getAttribute("data-full");
-  if(full&&img.src!==full&&!img.dataset.triedFull){img.dataset.triedFull="1";img.src=full}
-  else{img.onerror=null;img.src="data:image/svg+xml;utf8,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 120 120%27%3E%3Crect width=%27120%27 height=%27120%27 fill=%27%23eee%27/%3E%3Ctext x=%2760%27 y=%2766%27 font-size=%2711%27 text-anchor=%27middle%27 fill=%27%23999%27 font-family=%27sans-serif%27%3EPhoto unavailable%3C/text%3E%3C/svg%3E"}
+  const full=img.getAttribute("data-full"),orig=img.getAttribute("data-orig");
+  const stage=Number(img.dataset.stage||0);
+  img.dataset.stage=stage+1;
+  if(stage===0&&full&&img.src!==full){img.src=full;return}
+  if(stage<=1&&orig){img.dataset.stage=2;img.src=orig;return}
+  img.onerror=null;img.src=IMG_PLACEHOLDER;
+}
+function setDetailImg(url){
+  const di=document.getElementById("di");
+  di.dataset.stage="0";di.dataset.full=url||"";di.dataset.orig=WM_REV[url]||"";
+  di.onerror=function(){imgFallback(di)};
+  di.src=url;
 }
 
 // RENDER PRODUCTS
@@ -1211,32 +1229,51 @@ function updateProductCounts(){
   ["chooserPerfumeCount","sectionPerfumeCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=p});
   ["chooserCosmeticsCount","sectionCosmeticsCount"].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=c});
 }
-const PRODUCT_CACHE_KEY="romiluxe-products-v2";
+const PRODUCT_CACHE_KEY="romiluxe-products-v3";
 let productsLoadFailed=false;
+async function sbGetJson(path,timeoutMs){
+  const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),timeoutMs||20000);
+  try{
+    const res=await fetch(`${SUPABASE_URL}/rest/v1/${path}`,{headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY},signal:ctrl.signal});
+    if(!res.ok)throw new Error("Fetch failed: "+res.status);
+    return await res.json();
+  }finally{clearTimeout(timer)}
+}
 async function fetchProductRows(){
   let lastErr;
   for(let i=0;i<3;i++){
-    const ctrl=new AbortController();const timer=setTimeout(()=>ctrl.abort(),20000);
     try{
-      const res=await fetch(`${SUPABASE_URL}/rest/v1/products?is_deleted=eq.false&select=*&order=created_at.asc`,{
-        headers:{"apikey":SUPABASE_ANON_KEY,"Authorization":"Bearer "+SUPABASE_ANON_KEY},signal:ctrl.signal
-      });
-      if(!res.ok)throw new Error("Fetch failed: "+res.status);
-      const rows=await res.json();
+      const rows=await sbGetJson("products?is_deleted=eq.false&select=*&order=created_at.asc");
       if(!Array.isArray(rows))throw new Error("Unexpected response");
       return rows;
     }catch(e){lastErr=e;if(i<2)await new Promise(r=>setTimeout(r,1200*(i+1)))}
-    finally{clearTimeout(timer)}
   }
   throw lastErr;
+}
+// Watermark: settings (on/off) + which photos have a watermarked copy. If this ever fails, the shop
+// simply shows the original photos — it never blocks products from loading.
+async function fetchWatermarkData(){
+  try{
+    const [st,recs]=await Promise.all([
+      sbGetJson("watermark_settings?id=eq.1&select=enabled",10000),
+      sbGetJson("image_watermarks?select=original_url,watermarked_url,excluded&limit=5000",15000)
+    ]);
+    const map={};
+    (Array.isArray(recs)?recs:[]).forEach(r=>{if(r.original_url)map[r.original_url]={w:r.watermarked_url||"",x:!!r.excluded}});
+    return{enabled:!!(Array.isArray(st)&&st[0]&&st[0].enabled),map};
+  }catch(e){console.warn("Watermark data unavailable",e);return null}
+}
+function setWatermarkData(w){
+  WM.enabled=!!(w&&w.enabled);WM.map=(w&&w.map)||{};
 }
 // Loads from Supabase. The last good copy is also kept on the device so the shop appears instantly
 // (and still shows products if the connection is slow); it is refreshed on every visit.
 async function loadDbProducts(){
   try{
-    const rows=await fetchProductRows();
+    const [rows,wm]=await Promise.all([fetchProductRows(),fetchWatermarkData()]);
+    if(wm)setWatermarkData(wm);
     applyProductRows(rows);
-    try{localStorage.setItem(PRODUCT_CACHE_KEY,JSON.stringify(rows))}catch(e){}
+    try{localStorage.setItem(PRODUCT_CACHE_KEY,JSON.stringify({rows,wm:wm||{enabled:WM.enabled,map:WM.map}}))}catch(e){}
     productsLoadFailed=false;
     return true;
   }catch(e){
@@ -1247,8 +1284,8 @@ async function loadDbProducts(){
 }
 function loadCachedProducts(){
   try{
-    const rows=JSON.parse(localStorage.getItem(PRODUCT_CACHE_KEY)||"null");
-    if(Array.isArray(rows)&&rows.length){applyProductRows(rows);return true}
+    const c=JSON.parse(localStorage.getItem(PRODUCT_CACHE_KEY)||"null");
+    if(c&&Array.isArray(c.rows)&&c.rows.length){setWatermarkData(c.wm);applyProductRows(c.rows);return true}
   }catch(e){}
   return false;
 }
@@ -1263,7 +1300,7 @@ function applyProductRows(rows){
       if(r.color_variants){
         try{
           const parsed=typeof r.color_variants==="string"?JSON.parse(r.color_variants):r.color_variants;
-          colorVariants=(Array.isArray(parsed)?parsed:(Array.isArray(parsed?.variants)?parsed.variants:[])).filter(v=>v&&v.image);
+          colorVariants=(Array.isArray(parsed)?parsed:(Array.isArray(parsed?.variants)?parsed.variants:[])).filter(v=>v&&v.image).map(v=>({...v,image:wmu(v.image)}));
           // Several photos can share a name (e.g. five "Silver" bracelets). Number the repeats so each
           // one can be picked on its own and always shows its own photo.
           const seen={};
@@ -1277,7 +1314,7 @@ function applyProductRows(rows){
         id:Number(r.id),
         name:r.name,price:Number(r.price)||0,
         unit:cat==="wholesale"?"dozen":(r.unit||"piece"),
-        image:r.image_url,
+        image:wmu(r.image_url),
         description:r.description||"",
         moq:cat==="wholesale"?6:undefined,
         contents:cat==="wholesale"?(r.contents||""):undefined,
@@ -1353,7 +1390,7 @@ function openP(t,id){
   q=t==="wholesale"?WHOLESALE_MOQ:1;
   selectedColor=null;selectedDesign=null;selectedSize=null;
   document.getElementById("q").value=q;
-  document.getElementById("di").src=cur.image;
+  setDetailImg(cur.image);
   document.getElementById("dn").textContent=cur.name;
   document.getElementById("dt").textContent=t+" product";
   document.getElementById("dm").textContent=t==="wholesale"
@@ -1417,11 +1454,11 @@ function selectDesignVariant(design,image,btn){
   const alreadySelected=btn.classList.contains("selected");
   if(alreadySelected){
     selectedDesign=null;
-    document.getElementById("di").src=cur.image;
+    setDetailImg(cur.image);
     btn.classList.remove("selected");
   }else{
     selectedDesign=design;
-    document.getElementById("di").src=image;
+    setDetailImg(image);
     btn.parentElement.querySelectorAll(".variant-design-card").forEach(c=>c.classList.remove("selected"));
     btn.classList.add("selected");
   }
@@ -1431,11 +1468,11 @@ function selectColorVariant(color,image,btn){
   if(alreadySelected){
     // Tapping the same colour again deselects it and returns to the default cover photo.
     selectedColor=null;
-    document.getElementById("di").src=cur.image;
+    setDetailImg(cur.image);
     btn.classList.remove("selected");
   }else{
     selectedColor=color;
-    document.getElementById("di").src=image;
+    setDetailImg(image);
     btn.parentElement.querySelectorAll(".variant-swatch").forEach(c=>c.classList.remove("selected"));
     btn.classList.add("selected");
   }
@@ -1672,8 +1709,10 @@ function makeOrderId(){
 const STORAGE_BUCKET="romiluxe";
 function storagePublicUrl(path){return `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${path}`}
 function thumbUrl(url){
-  const s=String(url||"");
-  if(s.includes(`/storage/v1/object/public/${STORAGE_BUCKET}/products/`)&&/\.jpg$/i.test(s)&&!/_t\.jpg$/i.test(s))return s.replace(/\.jpg$/i,"_t.jpg");
+  const s=String(url||"");const q=s.indexOf("?");
+  const base=q<0?s:s.slice(0,q),qs=q<0?"":s.slice(q);
+  const pub=`/storage/v1/object/public/${STORAGE_BUCKET}/`;
+  if((base.includes(pub+"products/")||base.includes(pub+"wm/"))&&/\.jpg$/i.test(base)&&!/_t\.jpg$/i.test(base))return base.replace(/\.jpg$/i,"_t.jpg")+qs;
   return s;
 }
 async function decodeImage(file){
