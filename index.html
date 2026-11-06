@@ -2061,23 +2061,21 @@ if(window.matchMedia&&window.matchMedia("(hover:hover) and (pointer:fine)").matc
   });
 }
 
-// THEME TOGGLE
-function applyTheme(theme){
+// THEME TOGGLE (light by default; visitors can switch to dark and it is remembered)
+function applyTheme(theme,remember){
   document.documentElement.setAttribute("data-theme",theme);
   document.getElementById("themeIcon").textContent=theme==="dark"?"☀️":"🌙";
-  try{localStorage.setItem("romiluxe-theme",theme)}catch(e){}
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",theme==="dark"?"#0e0d0b":"#faf8f4");
+  if(remember){try{localStorage.setItem("romiluxe-theme-v2",theme)}catch(e){}}
 }
 function toggleTheme(){
   const current=document.documentElement.getAttribute("data-theme")==="dark"?"dark":"light";
-  applyTheme(current==="dark"?"light":"dark");
+  applyTheme(current==="dark"?"light":"dark",true);
 }
 (function initTheme(){
-  let saved=null;
-  try{saved=localStorage.getItem("romiluxe-theme")}catch(e){}
-  if(!saved){
-    saved=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
-  }
-  applyTheme(saved);
+  let saved="light";
+  try{const v=localStorage.getItem("romiluxe-theme-v2");if(v==="dark"||v==="light")saved=v}catch(e){}
+  applyTheme(saved,false);
 })();
 </script>
 </body>
