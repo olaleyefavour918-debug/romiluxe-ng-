@@ -702,6 +702,15 @@ footer{
   .tabbar a span{font-size:19px;line-height:1}
   .tabbar a.active{color:var(--gold);font-weight:700}
   body{padding-bottom:calc(66px + env(safe-area-inset-bottom))}
+  .hero{min-height:0}
+  .hero-left{padding:36px 20px 28px}
+  .hero-left h1{font-size:clamp(34px,10.5vw,44px);line-height:1.08;margin-bottom:14px}
+  .hero-eyebrow{font-size:10.5px;letter-spacing:2px;margin-bottom:16px}
+  .hero-desc{font-size:15px;line-height:1.7;margin-bottom:22px}
+  .hero-choices{flex-direction:column;gap:14px;width:100%}
+  .hero-choice,.hero-choice:last-child{max-width:none!important;width:100%}
+  .hero-choice button{width:100%;padding:15px 20px}
+  .hero-right{padding:8px 20px 32px}
   .logo-text{white-space:nowrap;font-size:22px}
   .nav-cart{display:none}
   .nav-right{gap:8px}
