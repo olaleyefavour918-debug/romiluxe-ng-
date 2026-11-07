@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=439ab116">
+<link rel="stylesheet" href="site.css?v=f03c43f3">
 <script>(function(){var m={"#retail":"retail.html","#wholesale":"wholesale.html","#perfumes":"perfumes.html","#cosmetics":"cosmetics.html"}[location.hash];if(m)location.replace(m)})()</script>
 </head>
 <body data-page="home">
@@ -49,11 +49,7 @@
     <div class="hero-eyebrow">Jewellery · Watches · Accessories</div>
     <h1 class="serif">Everyday <em>sparkle.</em><br>Wholesale value.</h1>
     <p class="hero-desc">Handpicked jewellery, watches and accessories — thoughtfully curated for you, whether you're shopping for yourself or your business. Every piece is genuine, every order is tracked, and we're always just a message away.</p>
-    <div class="hero-btns">
-      <button class="btn-primary" onclick="go('retail')">Shop Retail</button>
-      <button class="btn-outline" onclick="go('wholesale')">Shop Wholesale</button>
-      <button class="btn-outline" onclick="go('perfumes')">Shop Perfumes &amp; Cosmetics</button>
-    </div>
+    <div class="hero-btns hero-choices"><div class="hero-choice"><button class="btn-primary" onclick="go('retail')">Shop Retail</button><small>No MOQ. Premium packaging.</small></div><div class="hero-choice"><button class="btn-outline" onclick="go('wholesale')">Shop Wholesale</button><small>Bulk pricing. MOQ applies. Reseller-friendly prices.</small></div><div class="hero-choice"><button class="btn-outline" onclick="go('perfumes')">Shop Perfumes &amp; Cosmetics</button></div></div>
   </div>
   <div class="hero-right">
     <div class="hero-tags">
@@ -137,7 +133,7 @@
       <div class="chooser-card-inner">
         <div class="chooser-label">Retail</div>
         <h3 class="chooser-title serif">Individual pieces<br>at retail price</h3>
-        <p class="chooser-desc">Browse <span id="chooserRetailCount">24</span> jewellery, watch and accessory products. Perfect for personal styling or gifting.</p>
+        <p class="chooser-desc">Browse <span id="chooserRetailCount">24</span> jewellery, watch and accessory products. Perfect for personal styling or gifting.</p><p class="chooser-note">No MOQ. Premium packaging.</p>
         <span class="chooser-arrow">→</span>
       </div>
     </div>
@@ -145,7 +141,7 @@
       <div class="chooser-card-inner">
         <div class="chooser-label">Wholesale</div>
         <h3 class="chooser-title serif">Bulk orders<br>by pack & dozen</h3>
-        <p class="chooser-desc"><span id="chooserWholesaleCount">15</span> wholesale lines with minimum order quantities. Ideal for resellers and business buyers.</p>
+        <p class="chooser-desc"><span id="chooserWholesaleCount">15</span> wholesale lines with minimum order quantities. Ideal for resellers and business buyers.</p><p class="chooser-note">Bulk pricing. MOQ applies. Reseller-friendly prices.</p>
         <span class="chooser-arrow">→</span>
       </div>
     </div>
@@ -410,6 +406,6 @@
 </button>
 
 
-<script src="app.js?v=439ab116"></script>
+<script src="app.js?v=f03c43f3"></script>
 </body>
 </html>
