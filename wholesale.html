@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Wholesale Jewellery — Romiluxe Ng</title>
-<meta name="description" content="Wholesale jewellery and accessories by the dozen from Romiluxe Ng. Mix and match designs of the same kind.">
+<meta name="description" content="Wholesale jewellery, accessories, packaging and props from Romiluxe Ng. Mix and match designs of the same kind.">
 <script>try{var t=localStorage.getItem("romiluxe-theme-v2");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light")}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=3c059385">
+<link rel="stylesheet" href="site.css?v=0884cf72">
 </head>
 <body data-page="wholesale">
 <!-- NAV -->
@@ -28,6 +28,7 @@
       <li><a href="index.html#services">Services</a></li>
     </ul>
     <div class="nav-right">
+      <button class="menu-btn" id="menuBtn" onclick="toggleMenu()" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" aria-label="Toggle dark mode"><span id="themeIcon">🌙</span></button>
       <button class="nav-track" onclick="openTrackOrder()" aria-label="Track my order">
         📦 <span class="nav-track-label">Track Order</span>
@@ -42,6 +43,9 @@
   </div>
 </nav>
 
+
+<div class="mobile-menu" id="mobileMenu" hidden><a href="index.html"><span>🏠</span>Home</a><a href="retail.html"><span>💍</span>Retail</a><a href="wholesale.html" class="active"><span>📦</span>Wholesale</a><a href="perfumes.html"><span>🌸</span>Perfumes</a><a href="cosmetics.html"><span>💄</span>Cosmetics</a><a href="index.html#services"><span>✨</span>Services</a><button type="button" onclick="toggleMenu();openTrackOrder()"><span>📦</span>Track my order</button></div>
+<div class="menu-scrim" id="menuScrim" hidden onclick="toggleMenu()"></div>
 <nav class="tabbar" aria-label="Shop navigation"><a href="index.html"><span>🏠</span>Home</a><a href="retail.html"><span>💍</span>Retail</a><a href="wholesale.html" class="active" aria-current="page"><span>📦</span>Wholesale</a><a href="perfumes.html"><span>🌸</span>Perfumes</a><a href="cosmetics.html"><span>💄</span>Cosmetics</a></nav>
 
 <main class="shop-main">
@@ -52,14 +56,14 @@
       <div class="section-eyebrow"><span id="sectionWholesaleCount">0</span> products</div>
       <h2 class="section-title serif">Wholesale <em>Collection</em></h2>
     </div>
-    <p class="section-sub">Bulk prices for resellers and business buyers. Prices on this page are per dozen (12 pieces), not per piece.</p>
+    <p class="section-sub">Bulk prices for resellers and business buyers. Each product shows how it is sold (by the dozen, piece, pack or box) and its price per piece.</p>
   </div>
   <div class="rules-grid">
-    <div class="rule-card"><b>Priced per dozen</b><span>Every price on this page is for 12 pieces. The per-piece price is shown on each product.</span></div>
+    <div class="rule-card"><b>Clear bulk pricing</b><span>Each product says how it is sold (dozen, piece, pack or box) and shows the price per piece.</span></div>
     <div class="rule-card"><b>Minimum per product</b><span>Each product has its own minimum order quantity, shown on the product.</span></div>
     <div class="rule-card"><b>Mix &amp; Match</b><span>Mix designs of the same kind of item at the same price and minimum. Wholesale checkout starts from ₦15,000.</span></div>
   </div>
-  <div class="switch-note"><span><span class="price-pill" style="margin:0 10px 0 0">Wholesale prices · per dozen</span>Bulk pricing. MOQ applies. Reseller-friendly prices. &nbsp;Just want a single piece?</span><a href="retail.html">Go to Retail →</a></div>
+  <div class="switch-note"><span><span class="price-pill" style="margin:0 10px 0 0">Wholesale prices</span>Bulk pricing. MOQ applies. Reseller-friendly prices. &nbsp;Just want a single piece?</span><a href="retail.html">Go to Retail →</a></div>
 </div>
 <section class="section wholesale" id="wholesale">
   <div class="filter-row">
@@ -75,6 +79,8 @@
     <button class="filter-btn" data-f="watch" onclick="filterWholesale('watch',this)">Wristwatches</button>
     <button class="filter-btn" data-f="beads" onclick="filterWholesale('beads',this)">Beads</button>
     <button class="filter-btn" data-f="costume" onclick="filterWholesale('costume',this)">Costumes</button>
+    <button class="filter-btn" data-f="packaging" onclick="filterWholesale('packaging',this)">Packaging materials</button>
+    <button class="filter-btn" data-f="props" onclick="filterWholesale('props',this)">Props</button>
   </div>
   <div id="wg" class="product-grid"></div>
 </section>
@@ -267,6 +273,6 @@
 </button>
 
 
-<script src="app.js?v=3c059385"></script>
+<script src="app.js?v=0884cf72"></script>
 </body>
 </html>

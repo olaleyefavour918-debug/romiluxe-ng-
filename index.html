@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=3c059385">
+<link rel="stylesheet" href="site.css?v=0884cf72">
 <script>(function(){var m={"#retail":"retail.html","#wholesale":"wholesale.html","#perfumes":"perfumes.html","#cosmetics":"cosmetics.html"}[location.hash];if(m)location.replace(m)})()</script>
 </head>
 <body data-page="home">
@@ -29,6 +29,7 @@
       <li><a href="index.html#services">Services</a></li>
     </ul>
     <div class="nav-right">
+      <button class="menu-btn" id="menuBtn" onclick="toggleMenu()" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" aria-label="Toggle dark mode"><span id="themeIcon">🌙</span></button>
       <button class="nav-track" onclick="openTrackOrder()" aria-label="Track my order">
         📦 <span class="nav-track-label">Track Order</span>
@@ -43,6 +44,9 @@
   </div>
 </nav>
 
+
+<div class="mobile-menu" id="mobileMenu" hidden><a href="index.html" class="active"><span>🏠</span>Home</a><a href="retail.html"><span>💍</span>Retail</a><a href="wholesale.html"><span>📦</span>Wholesale</a><a href="perfumes.html"><span>🌸</span>Perfumes</a><a href="cosmetics.html"><span>💄</span>Cosmetics</a><a href="index.html#services"><span>✨</span>Services</a><button type="button" onclick="toggleMenu();openTrackOrder()"><span>📦</span>Track my order</button></div>
+<div class="menu-scrim" id="menuScrim" hidden onclick="toggleMenu()"></div>
 <nav class="tabbar" aria-label="Shop navigation"><a href="index.html" class="active" aria-current="page"><span>🏠</span>Home</a><a href="retail.html"><span>💍</span>Retail</a><a href="wholesale.html"><span>📦</span>Wholesale</a><a href="perfumes.html"><span>🌸</span>Perfumes</a><a href="cosmetics.html"><span>💄</span>Cosmetics</a></nav>
 <!-- HERO -->
 <header class="hero" id="home">
@@ -127,7 +131,7 @@
       <div class="section-eyebrow">Shop your way</div>
       <h2 class="section-title serif">Choose a <em>collection</em></h2>
     </div>
-    <p class="section-sub">Retail and wholesale have their own pages, so prices are never confused. Retail is priced per piece; wholesale is priced per dozen.</p>
+    <p class="section-sub">Retail and wholesale have their own pages, so prices are never confused. Retail is priced per piece; wholesale products show how they are sold (dozen, piece, pack or box) and the price per piece.</p>
   </div>
   <div class="chooser">
     <div class="chooser-card" onclick="go('retail')" role="link" tabindex="0">
@@ -141,7 +145,7 @@
     <div class="chooser-card" onclick="go('wholesale')" role="link" tabindex="0">
       <div class="chooser-card-inner">
         <div class="chooser-label">Wholesale</div>
-        <h3 class="chooser-title serif">Bulk orders<br>by pack & dozen</h3>
+        <h3 class="chooser-title serif">Bulk orders<br>at reseller prices</h3>
         <p class="chooser-desc"><span id="chooserWholesaleCount">15</span> wholesale lines with minimum order quantities. Ideal for resellers and business buyers.</p><p class="chooser-note">Bulk pricing. MOQ applies. Reseller-friendly prices.</p>
         <span class="chooser-arrow">→</span>
       </div>
@@ -407,6 +411,6 @@
 </button>
 
 
-<script src="app.js?v=3c059385"></script>
+<script src="app.js?v=0884cf72"></script>
 </body>
 </html>

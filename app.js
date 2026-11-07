@@ -115,14 +115,14 @@ function applyProductRows(rows){
     D.retail=[];D.wholesale=[];D.perfume=[];D.cosmetics=[];
     rows.forEach(r=>{
       const cat=PRODUCT_TYPES.includes(r.category)?r.category:"retail";
-      let colorVariants=[],mixMatch=false,mixType="";
+      let colorVariants=[],mixMatch=false,mixType="",packMeta=0;
       const isFakePiercingSticker=/fake\s*piercing\s*sticker/i.test(String(r.name||''));
       // All wholesale products support Mix & Match by default, except the fake piercing sticker.
       if(cat==="wholesale" && !isFakePiercingSticker) mixMatch=true;
       if(r.color_variants){
         try{
           const parsed=typeof r.color_variants==="string"?JSON.parse(r.color_variants):r.color_variants;
-          mixType=String(parsed?.meta?.mixType||"");
+          mixType=String(parsed?.meta?.mixType||"");packMeta=Number(parsed?.meta?.packSize)||0;
           colorVariants=(Array.isArray(parsed)?parsed:(Array.isArray(parsed?.variants)?parsed.variants:[])).filter(v=>v&&v.image).map(v=>({...v,image:wmu(v.image)}));
           // Several photos can share a name (e.g. five "Silver" bracelets). Number the repeats so each
           // one can be picked on its own and always shows its own photo.
@@ -136,7 +136,8 @@ function applyProductRows(rows){
       const item={
         id:Number(r.id),
         name:r.name,price:Number(r.price)||0,
-        unit:cat==="wholesale"?"dozen":(r.unit||"piece"),
+        unit:cat==="wholesale"?(String(r.unit||"dozen").toLowerCase()):(r.unit||"piece"),
+        packSize:cat==="wholesale"?packSizeOf(String(r.unit||"dozen").toLowerCase(),packMeta):1,
         image:wmu(r.image_url),
         description:r.description||"",
         moq:cat==="wholesale"?(Math.max(1,Math.floor(Number(r.moq))||6)):undefined,
@@ -218,10 +219,10 @@ function openP(t,id){
   document.getElementById("dn").textContent=cur.name;
   document.getElementById("dt").textContent=t+" product";
   document.getElementById("dm").textContent=t==="wholesale"
-    ?(cur.contents||"Wholesale pricing")+". Minimum order: "+moqOf(cur)+" pieces"
+    ?(cur.contents||"Wholesale pricing")+" · "+packNote(cur).replace(/^./,c=>c.toUpperCase())+(packOf(cur)>1?" · "+money(Number(cur.price)/packOf(cur))+" per piece":"")+" · Minimum order: "+moqOf(cur)+" pieces"
     :(TYPE_LABELS[t]||"Retail")+" · Individual item";
   document.getElementById("dp").textContent=money(cur.price);
-  document.getElementById("du").textContent=t==="wholesale"?"/dozen":"/"+cur.unit;
+  document.getElementById("du").textContent=t==="wholesale"?"/"+unitOf(cur):"/"+cur.unit;
   const detailMixBtn=document.getElementById("detailMixBtn");
   if(detailMixBtn)detailMixBtn.style.display=t==="wholesale"&&cur.mixMatch?"block":"none";
   renderDescription();
@@ -310,7 +311,7 @@ function closeM(){document.getElementById("modal").classList.remove("open")}
 function setQ(v){q=Math.max(typ==="wholesale"?moqOf(cur):1,Math.floor(Number(v)||1));document.getElementById("q").value=q;updateDetail()}
 function chg(n){setQ(q+n)}
 function updateDetail(){
-  const total=typ==="wholesale"?(Number(cur.price)/12)*q:Number(cur.price)*q;
+  const total=typ==="wholesale"?(Number(cur.price)/packOf(cur))*q:Number(cur.price)*q;
   document.getElementById("tot").textContent="Total: "+money(total);
 }
 
@@ -322,9 +323,11 @@ const WHOLESALE_MIN_TOTAL=15000;
 let mixGroup=null,mixSelections={};
 // Mix & Match only combines pieces of the SAME KIND (necklace with necklace, bracelet with bracelet...)
 // AND the same wholesale price. The kind is set in the admin; if not set it is read from the product name.
-const MIX_KINDS={necklace:"Necklaces",bracelet:"Bracelets",bangle:"Bangles",nosering:"Nose rings",earring:"Earrings",legchain:"Leg chains",waistchain:"Waist chains",watch:"Wristwatches",beads:"Beads",costume:"Costumes",other:"Other items"};
+const MIX_KINDS={packaging:"Packaging materials",props:"Props",necklace:"Necklaces",bracelet:"Bracelets",bangle:"Bangles",nosering:"Nose rings",earring:"Earrings",legchain:"Leg chains",waistchain:"Waist chains",watch:"Wristwatches",beads:"Beads",costume:"Costumes",other:"Other items"};
 function mixDetect(name){
   const s=String(name||"").toLowerCase();
+  if(/packag|gift\s*box|jewell?ery\s*box|pouch|ribbon|bubble\s*wrap|\bbox(es)?\b|carton/.test(s))return"packaging";
+  if(/\bprops?\b|display|\bstand\b|mannequin|\bbust\b|\btray\b|\bholder\b/.test(s))return"props";
   if(/necklace|choker|pendant/.test(s))return"necklace";
   if(/bangle/.test(s))return"bangle";
   if(/bracelet|cuff/.test(s))return"bracelet";
@@ -338,8 +341,14 @@ function mixDetect(name){
   return"other";
 }
 function mixKind(p){return cat(p)}
-function wholesaleGroupKey(p){return `${mixKind(p)}|${Number(p.price).toFixed(2)}|${moqOf(p)}`}
-function wholesalePackPieces(p){return 12}
+function wholesaleGroupKey(p){return `${mixKind(p)}|${Number(p.price).toFixed(2)}|${moqOf(p)}|${unitOf(p)}|${packOf(p)}`}
+function packSizeOf(unit,meta){const m=Math.floor(Number(meta));if(m>=1)return m;if(unit==="piece")return 1;return 12}
+const unitOf=p=>String((p&&p.unit)||"dozen");
+const packOf=p=>Math.max(1,Math.floor(Number(p&&p.packSize))||12);
+const groupUnit=g=>String(g||"").split("|")[3]||"dozen";
+const groupPack=g=>Math.max(1,Math.floor(Number(String(g||"").split("|")[4]))||12);
+const packNote=p=>packOf(p)===1?"sold per piece":`sold per ${unitOf(p)} (${packOf(p)} pieces)`;
+function wholesalePackPieces(p){return packOf(p)}
 function wholesalePiecePrice(p){return Number(p.price)/wholesalePackPieces(p)}
 function wholesaleVariants(p){
   const vs=(p.colorVariants||[]).filter(v=>v&&v.image);
@@ -359,12 +368,12 @@ function openWholesaleMix(id){
   mixSelections={};
   const group=D.wholesale.filter(p=>wholesaleGroupKey(p)===mixGroup&&p.mixMatch);
   const kindLabel=MIX_KINDS[mixKind(selected)]||"items",gMoq=moqOf(selected);
-  document.getElementById("mixTitle").textContent=`Mix & Match ${kindLabel} · ${money(selected.price)} per dozen · min ${gMoq} pieces`;
-  document.getElementById("mixIntro").textContent=`Choose any combination from the Mix & Match ${kindLabel.toLowerCase()} at ${money(selected.price)} per dozen. You can mix designs and colours of the same kind of item, but not different kinds (e.g. necklaces with bracelets), different wholesale prices or different minimum order quantities. Minimum for this group: ${gMoq} pieces.`;
+  document.getElementById("mixTitle").textContent=`Mix & Match ${kindLabel} · ${money(selected.price)} per ${unitOf(selected)} · min ${gMoq} pieces`;
+  document.getElementById("mixIntro").textContent=`Choose any combination from the Mix & Match ${kindLabel.toLowerCase()} at ${money(selected.price)} per ${unitOf(selected)}${packOf(selected)>1?" ("+packOf(selected)+" pieces)":""}. You can mix designs and colours of the same kind of item, but not different kinds (e.g. necklaces with bracelets), different wholesale prices or different minimum order quantities. Minimum for this group: ${gMoq} pieces.`;
   const list=document.getElementById("mixGroupList");
   list.innerHTML=group.map(p=>{
     const variants=wholesaleVariants(p);
-    return `<div class="mix-product"><div class="mix-product-head">${imgTag(p.image,p.name)}<div><div class="mix-product-name">${esc(p.name)}</div><div class="mix-product-price">${money(p.price)} per dozen · ${money(wholesalePiecePrice(p))} per piece</div></div></div><div class="mix-choices">${variants.map(v=>{mixSelections[v.key]=0;return `<div class="mix-choice">${imgTag(v.image,v.label)}<div><div class="mix-choice-name">${esc(v.label)}</div><div class="mix-choice-sub">Add pieces of this design</div></div><div class="mix-stepper"><button type="button" data-k="${esc(v.key)}" onclick="changeMixQty(this.dataset.k,-1)">−</button><span id="mixq-${cssKey(v.key)}">0</span><button type="button" data-k="${esc(v.key)}" onclick="changeMixQty(this.dataset.k,1)">+</button></div></div>`}).join("")}</div></div>`;
+    return `<div class="mix-product"><div class="mix-product-head">${imgTag(p.image,p.name)}<div><div class="mix-product-name">${esc(p.name)}</div><div class="mix-product-price">${money(p.price)} per ${unitOf(p)}${packOf(p)>1?" ("+packOf(p)+" pieces)":""} · ${money(wholesalePiecePrice(p))} per piece</div></div></div><div class="mix-choices">${variants.map(v=>{mixSelections[v.key]=0;return `<div class="mix-choice">${imgTag(v.image,v.label)}<div><div class="mix-choice-name">${esc(v.label)}</div><div class="mix-choice-sub">Add pieces of this design</div></div><div class="mix-stepper"><button type="button" data-k="${esc(v.key)}" onclick="changeMixQty(this.dataset.k,-1)">−</button><span id="mixq-${cssKey(v.key)}">0</span><button type="button" data-k="${esc(v.key)}" onclick="changeMixQty(this.dataset.k,1)">+</button></div></div>`}).join("")}</div></div>`;
   }).join("");
   updateMixSummary();
   document.getElementById("wholesaleMixModal").classList.add("open");
@@ -381,7 +390,7 @@ function mixPieces(){return Object.values(mixSelections).reduce((a,b)=>a+b,0)}
 function mixSubtotal(){
   if(!mixGroup)return 0;
   const price=Number(mixGroup.split("|")[1]);
-  return mixPieces()*(price/12);
+  return mixPieces()*(price/groupPack(mixGroup));
 }
 function updateMixSummary(){
   const pieces=mixPieces(),subtotal=mixSubtotal();
@@ -417,7 +426,7 @@ function addWholesaleMixToCart(){
     const displayName=`${p.name} (${v.label})`;
     const ex=cart.find(x=>x.key===cartKey);
     if(ex)ex.qty+=qty;
-    else cart.push({key:cartKey,typ:"wholesale",id:p.id,name:displayName,price:price/12,unit:"piece",qty,image:v.image,wholesaleGroup:mixGroup});
+    else cart.push({key:cartKey,typ:"wholesale",id:p.id,name:displayName,price:price/groupPack(mixGroup),unit:"piece",qty,image:v.image,wholesaleGroup:mixGroup});
   });
   updateCartUI();closeWholesaleMix();openCart();
 }
@@ -437,7 +446,7 @@ function addCurrentToCart(){
   const displayName=cur.name+(variantSuffix?` (${[selectedVariant,selectedSize].filter(Boolean).join(", ")})`:"");
   const variantMatch=cur.colorVariants&&cur.colorVariants.find(v=>(v.type==="design"?v.design:v.color)===selectedVariant);
   const cartImage=variantMatch?variantMatch.image:cur.image;
-  const cartPrice=typ==="wholesale"?Number(cur.price)/12:Number(cur.price);
+  const cartPrice=typ==="wholesale"?Number(cur.price)/packOf(cur):Number(cur.price);
   const cartUnit=typ==="wholesale"?"piece":cur.unit;
   const wholesaleGroup=typ==="wholesale"?wholesaleGroupKey(cur):null;
   // Note: individually-added wholesale products (each already meeting its own MOQ on its
@@ -943,3 +952,11 @@ function toggleTheme(){
   try{const v=localStorage.getItem("romiluxe-theme-v2");if(v==="dark"||v==="light")saved=v}catch(e){}
   applyTheme(saved,false);
 })();
+
+function toggleMenu(force){
+  const m=document.getElementById("mobileMenu"),sc=document.getElementById("menuScrim"),b=document.getElementById("menuBtn");if(!m)return;
+  const open=typeof force==="boolean"?force:m.hidden;
+  m.hidden=!open;sc.hidden=!open;b.classList.toggle("open",open);b.setAttribute("aria-expanded",open?"true":"false");
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")toggleMenu(false)});
+window.addEventListener("resize",()=>{if(innerWidth>768)toggleMenu(false)});
