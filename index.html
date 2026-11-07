@@ -875,9 +875,14 @@ footer{
     <button class="filter-btn active" data-f="all" onclick="filterRetail('all',this)">All</button>
     <button class="filter-btn" data-f="necklace" onclick="filterRetail('necklace',this)">Necklaces</button>
     <button class="filter-btn" data-f="bracelet" onclick="filterRetail('bracelet',this)">Bracelets</button>
-    <button class="filter-btn" data-f="watch" onclick="filterRetail('watch',this)">Watches</button>
+    <button class="filter-btn" data-f="bangle" onclick="filterRetail('bangle',this)">Bangles</button>
+    <button class="filter-btn" data-f="nosering" onclick="filterRetail('nosering',this)">Nose rings</button>
     <button class="filter-btn" data-f="earring" onclick="filterRetail('earring',this)">Earrings</button>
-    <button class="filter-btn" data-f="other" onclick="filterRetail('other',this)">Other</button>
+    <button class="filter-btn" data-f="legchain" onclick="filterRetail('legchain',this)">Leg chains</button>
+    <button class="filter-btn" data-f="waistchain" onclick="filterRetail('waistchain',this)">Waist chains</button>
+    <button class="filter-btn" data-f="watch" onclick="filterRetail('watch',this)">Wristwatches</button>
+    <button class="filter-btn" data-f="beads" onclick="filterRetail('beads',this)">Beads</button>
+    <button class="filter-btn" data-f="costume" onclick="filterRetail('costume',this)">Costumes</button>
   </div>
   <div id="rg" class="product-grid"></div>
 </section>
@@ -905,8 +910,14 @@ footer{
     <button class="filter-btn active" data-f="all" onclick="filterWholesale('all',this)">All</button>
     <button class="filter-btn" data-f="necklace" onclick="filterWholesale('necklace',this)">Necklaces</button>
     <button class="filter-btn" data-f="bracelet" onclick="filterWholesale('bracelet',this)">Bracelets</button>
+    <button class="filter-btn" data-f="bangle" onclick="filterWholesale('bangle',this)">Bangles</button>
+    <button class="filter-btn" data-f="nosering" onclick="filterWholesale('nosering',this)">Nose rings</button>
     <button class="filter-btn" data-f="earring" onclick="filterWholesale('earring',this)">Earrings</button>
-    <button class="filter-btn" data-f="other" onclick="filterWholesale('other',this)">Other</button>
+    <button class="filter-btn" data-f="legchain" onclick="filterWholesale('legchain',this)">Leg chains</button>
+    <button class="filter-btn" data-f="waistchain" onclick="filterWholesale('waistchain',this)">Waist chains</button>
+    <button class="filter-btn" data-f="watch" onclick="filterWholesale('watch',this)">Wristwatches</button>
+    <button class="filter-btn" data-f="beads" onclick="filterWholesale('beads',this)">Beads</button>
+    <button class="filter-btn" data-f="costume" onclick="filterWholesale('costume',this)">Costumes</button>
   </div>
   <div id="wg" class="product-grid"></div>
 </section>
@@ -1192,7 +1203,7 @@ const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 let cur,typ,q,cart=[],selectedColor=null,selectedDesign=null,selectedSize=null,productsLoadedOnce=false;
 const money=n=>"₦"+Number(n).toLocaleString("en-NG");
 const go=id=>document.getElementById(id)?.scrollIntoView({behavior:"smooth"});
-const cat=p=>{let s=p.name.toLowerCase();if(s.includes("necklace"))return"necklace";if(s.includes("bracelet")||s.includes("bangle"))return"bracelet";if(s.includes("watch"))return"watch";if(s.includes("earring")||s.includes("hoop"))return"earring";return"other"};
+const cat=p=>(p.mixType&&typeof MIX_KINDS!=="undefined"&&MIX_KINDS[p.mixType]&&p.mixType!=="other")?p.mixType:mixDetect(p.name);
 const wa=t=>"https://wa.me/"+WA+"?text="+encodeURIComponent(t);
 const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
 // Product photo tag: small thumbnail for lists (falls back to the full photo if the thumbnail is missing).
@@ -1497,20 +1508,22 @@ const WHOLESALE_MIN_TOTAL=15000;
 let mixGroup=null,mixSelections={};
 // Mix & Match only combines pieces of the SAME KIND (necklace with necklace, bracelet with bracelet...)
 // AND the same wholesale price. The kind is set in the admin; if not set it is read from the product name.
-const MIX_KINDS={necklace:"Necklaces",bracelet:"Bracelets",earring:"Earrings",ring:"Rings",anklet:"Anklets",watch:"Watches",chain:"Chains",set:"Jewellery sets",other:"Other items"};
+const MIX_KINDS={necklace:"Necklaces",bracelet:"Bracelets",bangle:"Bangles",nosering:"Nose rings",earring:"Earrings",legchain:"Leg chains",waistchain:"Waist chains",watch:"Wristwatches",beads:"Beads",costume:"Costumes",other:"Other items"};
 function mixDetect(name){
   const s=String(name||"").toLowerCase();
   if(/necklace|choker|pendant/.test(s))return"necklace";
-  if(/bracelet|bangle|cuff/.test(s))return"bracelet";
-  if(/anklet/.test(s))return"anklet";
+  if(/bangle/.test(s))return"bangle";
+  if(/bracelet|cuff/.test(s))return"bracelet";
+  if(/nose\s*-?(ring|pin|stud)/.test(s))return"nosering";
   if(/earring|hoop|stud/.test(s))return"earring";
-  if(/\bring/.test(s))return"ring";
+  if(/leg\s*-?chain|anklet/.test(s))return"legchain";
+  if(/waist\s*-?chain|belly\s*-?chain/.test(s))return"waistchain";
   if(/watch/.test(s))return"watch";
-  if(/chain/.test(s))return"chain";
-  if(/\bset\b/.test(s))return"set";
+  if(/bead/.test(s))return"beads";
+  if(/costume/.test(s))return"costume";
   return"other";
 }
-function mixKind(p){return (p.mixType&&MIX_KINDS[p.mixType])?p.mixType:mixDetect(p.name)}
+function mixKind(p){return cat(p)}
 function wholesaleGroupKey(p){return `${mixKind(p)}|${Number(p.price).toFixed(2)}`}
 function wholesalePackPieces(p){return 12}
 function wholesalePiecePrice(p){return Number(p.price)/wholesalePackPieces(p)}
