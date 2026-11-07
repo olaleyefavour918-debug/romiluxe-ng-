@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Perfumes — Romiluxe Ng</title>
+<meta name="description" content="Perfumes from Romiluxe Ng at retail prices.">
+<script>try{var t=localStorage.getItem("romiluxe-theme-v2");document.documentElement.setAttribute("data-theme",t==="dark"?"dark":"light")}catch(e){document.documentElement.setAttribute("data-theme","light")}</script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=439ab116">
+</head>
+<body data-page="perfumes">
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="index.html">
+      <span class="logo-text">Romiluxe <span>Ng</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="retail.html">Retail</a></li>
+      <li><a href="wholesale.html">Wholesale</a></li>
+      <li><a href="perfumes.html" class="active" aria-current="page">Perfumes</a></li>
+      <li><a href="cosmetics.html">Cosmetics</a></li>
+      <li><a href="index.html#services">Services</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle" aria-label="Toggle dark mode"><span id="themeIcon">🌙</span></button>
+      <button class="nav-track" onclick="openTrackOrder()" aria-label="Track my order">
+        📦 <span class="nav-track-label">Track Order</span>
+      </button>
+      <button class="nav-cart" onclick="openCart()">
+        🛍 Cart <span id="cartCount" class="cart-badge">0</span>
+      </button>
+      <a id="topwa" class="nav-wa" target="_blank">
+        <span>💬</span> <span class="nav-wa-label">WhatsApp</span>
+      </a>
+    </div>
+  </div>
+</nav>
+
+
+<main class="shop-main">
+<div class="page-banner">
+  <div class="crumbs"><a href="index.html">Home</a> / Perfume</div>
+  <div class="section-header section-row">
+    <div>
+      <div class="section-eyebrow"><span id="sectionPerfumeCount">0</span> products</div>
+      <h2 class="section-title serif">Perfume <em>Collection</em></h2>
+    </div>
+    <p class="section-sub">Fragrances for individual buyers, priced at retail.</p>
+  </div>
+
+</div>
+<section class="section perfume" id="perfumes">
+  <div id="pg" class="product-grid"></div>
+</section>
+</main>
+<!-- HELP BAND -->
+<div class="cta-band">
+  <div class="cta-band-text">
+    <h2 class="serif">Can't find what<br>you're <em>looking for?</em></h2>
+    <p>Chat directly with a personal seller for help with available designs and latest arrivals.</p>
+  </div>
+  <a id="seller" class="btn-gold" target="_blank">Chat on WhatsApp →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="logo-text serif">Romiluxe <span style="color:var(--gold)">Ng</span></div>
+        <p>Jewellery, watches and accessories for retail and wholesale buyers. Beautiful pieces at everyday prices.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Collections</h4>
+        <a href="retail.html">Retail Collection</a>
+        <a href="wholesale.html">Wholesale Collection</a>
+        <a href="perfumes.html">Perfume Collection</a>
+        <a href="cosmetics.html">Cosmetics Collection</a>
+      </div>
+      <div class="footer-col">
+        <h4>Navigate</h4>
+        <a href="index.html">Home</a>
+        <a href="index.html#services">Services</a>
+        <a href="javascript:void(0)" onclick="openTrackOrder()">Track My Order</a>
+        <a href="https://www.tiktok.com/@romiluxe_jewelry" target="_blank">TikTok</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <p>09152313648</p>
+        <p>Yaba, Lagos</p>
+        <p>Nationwide delivery</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2026 Romiluxe Ng. All rights reserved.</span>
+      <span class="footer-copy">Jewellery · Watches · Accessories</span>
+    </div>
+  </div>
+</footer>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-box detail-modal">
+    <button class="modal-close" onclick="closeM()">×</button>
+    <div class="detail-grid">
+      <div class="detail-img"><img id="di" alt=""></div>
+      <div class="detail-info">
+        <div id="dt" class="detail-tag"></div>
+        <h2 id="dn" class="detail-name serif"></h2>
+        <p id="dm" class="detail-desc"></p>
+        <div class="detail-price-row">
+          <div id="dp" class="detail-price"></div>
+          <div id="du" class="detail-unit"></div>
+        </div>
+        <div id="descWrap"></div>
+        <div id="variantWrap"></div>
+        <div class="qty-row">
+          <button class="qty-btn" onclick="chg(-1)">−</button>
+          <input id="q" class="qty-input" type="number" min="1" onchange="setQ(this.value)">
+          <button class="qty-btn" onclick="chg(1)">+</button>
+        </div>
+        <div id="tot" class="detail-total"></div>
+        <div class="detail-actions">
+          <button class="add-cart-btn" onclick="addCurrentToCart()">Add to Cart</button>
+          <button type="button" class="detail-mix-btn" id="detailMixBtn" onclick="openWholesaleMix(cur&&cur.id)" style="display:none">Mix & Match</button>
+        </div>
+      </div>
+    </div>
+    <div class="similar-section">
+      <h3 class="similar-title serif">You May Also Like</h3>
+      <div id="sg" class="similar-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- WHOLESALE MIX & MATCH MODAL -->
+<div id="wholesaleMixModal" class="modal">
+  <div class="modal-box mix-modal">
+    <button class="modal-close" onclick="closeWholesaleMix()">×</button>
+    <div class="mix-head">
+      <div class="detail-tag">WHOLESALE</div>
+      <h2 id="mixTitle" class="checkout-title serif">Choose your designs</h2>
+      <p id="mixIntro" class="checkout-sub"></p>
+      <div class="mix-steps">
+        <div class="mix-step"><b>1. Pick designs</b>Choose any designs you like.</div>
+        <div class="mix-step"><b>2. Set quantities</b>Use + and − for each design.</div>
+        <div class="mix-step"><b>3. Buy 6+</b>Reach at least 6 pieces to continue.</div>
+      </div>
+    </div>
+    <div id="mixGroupList" class="mix-group-list"></div>
+    <div class="mix-summary">
+      <div><span>Total pieces</span><strong id="mixPieces">0</strong></div>
+      <div><span>Estimated total</span><strong id="mixSubtotal">₦0</strong></div>
+      <p id="mixRule" class="mix-rule"></p>
+      <button class="add-cart-btn" id="mixAddBtn" onclick="addWholesaleMixToCart()">Add Selection to Cart</button>
+    </div>
+  </div>
+</div>
+
+<!-- CART MODAL -->
+<div id="cartModal" class="modal">
+  <div class="modal-box cart-modal">
+    <button class="modal-close" onclick="closeCart()">×</button>
+    <div class="cart-header">
+      <div class="detail-tag">Your order</div>
+      <h2 class="cart-title serif">Shopping Cart</h2>
+    </div>
+    <div id="cartList" class="cart-list"></div>
+    <div id="cartSummary" class="cart-footer"></div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div id="checkoutModal" class="modal">
+  <div class="modal-box checkout-modal">
+    <button class="modal-close" onclick="closeCheckout()">×</button>
+    <div class="checkout-body">
+      <div class="detail-tag">Checkout</div>
+      <h2 class="checkout-title serif">Complete Your Order</h2>
+      <p class="checkout-sub">Make your bank transfer using the details below, then fill in your information and upload your payment screenshot.</p>
+      <div id="checkoutItems" class="order-summary"></div>
+      <div class="payment-box">
+        <div class="payment-box-title">Payment Details</div>
+        <div class="payment-line"><b>Bank:</b> <span id="bankName"></span></div>
+        <div class="payment-line"><b>Account Name:</b> <span id="accountName"></span></div>
+        <div class="payment-line"><b>Account Number:</b> <span id="accountNumber"></span></div>
+        <div class="payment-line"><b>Shipping Fee:</b> <span>Not included above — varies by location. We'll contact you after your order to confirm the shipping cost.</span></div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>Full Name</label><input id="customerName" autocomplete="name" placeholder="Your full name" required></div>
+        <div class="field"><label>Phone Number</label><input id="customerPhone" autocomplete="tel" placeholder="e.g. 08012345678" required></div>
+        <div class="field"><label>Email Address</label><input id="customerEmail" type="email" autocomplete="email" placeholder="your@email.com" required></div>
+        <div class="field"><label>City</label><input id="customerCity" autocomplete="address-level2" placeholder="Your city" required></div>
+        <div class="field full"><label>Delivery Address</label><textarea id="customerAddress" autocomplete="street-address" placeholder="Your full delivery address" required></textarea></div>
+        <div class="field full">
+          <label>Proof of Payment</label>
+          <input id="paymentProof" type="file" accept="image/png,image/jpeg,image/webp" required>
+          <p style="font-size:12px;color:var(--muted);margin-top:6px">Upload a screenshot of your transfer confirmation. JPG, PNG or WEBP. Max 5 MB.</p>
+        </div>
+      </div>
+      <div class="checkout-actions">
+        <button class="btn-back" onclick="closeCheckout()">← Back to Cart</button>
+        <button class="btn-primary" id="submitOrderBtn" onclick="submitOrder()">Submit Order →</button>
+      </div>
+      <p id="checkoutMsg" class="checkout-msg"></p>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div id="successModal" class="modal">
+  <div class="modal-box success-modal">
+    <button class="modal-close" onclick="closeSuccess()">×</button>
+    <div class="success-body">
+      <div class="success-check">✓</div>
+      <div class="detail-tag" style="justify-content:center;margin-bottom:8px">Order received</div>
+      <h2 class="success-title serif">Thank you!</h2>
+      <p class="success-sub">Your order has been submitted successfully. Please keep your order reference for your records.</p>
+      <div id="successRef" class="success-ref"></div>
+      <button class="btn-primary" onclick="closeSuccess()" style="width:100%;justify-content:center">Continue Shopping</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACK ORDER MODAL -->
+<div id="trackModal" class="modal">
+  <div class="modal-box checkout-modal">
+    <button class="modal-close" onclick="closeTrackOrder()">×</button>
+    <div class="checkout-body">
+      <div class="detail-tag">Order status</div>
+      <h2 class="checkout-title serif">My Orders</h2>
+      <p class="checkout-sub">Here are the orders you've placed from this device.</p>
+      <div id="trackResult" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- CART FAB -->
+<button id="cartFab" class="cart-fab" onclick="openCart()">
+  🛍 Cart <span id="cartFabCount">0</span>
+</button>
+
+
+<script src="app.js?v=439ab116"></script>
+</body>
+</html>
