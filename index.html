@@ -1293,13 +1293,14 @@ function applyProductRows(rows){
     D.retail=[];D.wholesale=[];D.perfume=[];D.cosmetics=[];
     rows.forEach(r=>{
       const cat=PRODUCT_TYPES.includes(r.category)?r.category:"retail";
-      let colorVariants=[],mixMatch=false;
+      let colorVariants=[],mixMatch=false,mixType="";
       const isFakePiercingSticker=/fake\s*piercing\s*sticker/i.test(String(r.name||''));
       // All wholesale products support Mix & Match by default, except the fake piercing sticker.
       if(cat==="wholesale" && !isFakePiercingSticker) mixMatch=true;
       if(r.color_variants){
         try{
           const parsed=typeof r.color_variants==="string"?JSON.parse(r.color_variants):r.color_variants;
+          mixType=String(parsed?.meta?.mixType||"");
           colorVariants=(Array.isArray(parsed)?parsed:(Array.isArray(parsed?.variants)?parsed.variants:[])).filter(v=>v&&v.image).map(v=>({...v,image:wmu(v.image)}));
           // Several photos can share a name (e.g. five "Silver" bracelets). Number the repeats so each
           // one can be picked on its own and always shows its own photo.
@@ -1320,7 +1321,7 @@ function applyProductRows(rows){
         contents:cat==="wholesale"?(r.contents||""):undefined,
         colors:colorVariants.filter(v=>v.type!=="design").map(v=>v.color).filter(Boolean).length?colorVariants.filter(v=>v.type!=="design").map(v=>v.color).filter(Boolean):(r.colors?String(r.colors).split(",").map(s=>s.trim()).filter(Boolean):[]),
         colorVariants,
-        mixMatch,
+        mixMatch,mixType,
         sizes:r.sizes?String(r.sizes).split(",").map(s=>s.trim()).filter(Boolean):[]
       };
       D[cat].push(item);
@@ -1494,7 +1495,23 @@ function updateDetail(){
 const WHOLESALE_MOQ=6;
 const WHOLESALE_MIN_TOTAL=15000;
 let mixGroup=null,mixSelections={};
-function wholesaleGroupKey(p){return `${cat(p)}|${Number(p.price).toFixed(2)}`}
+// Mix & Match only combines pieces of the SAME KIND (necklace with necklace, bracelet with bracelet...)
+// AND the same wholesale price. The kind is set in the admin; if not set it is read from the product name.
+const MIX_KINDS={necklace:"Necklaces",bracelet:"Bracelets",earring:"Earrings",ring:"Rings",anklet:"Anklets",watch:"Watches",chain:"Chains",set:"Jewellery sets",other:"Other items"};
+function mixDetect(name){
+  const s=String(name||"").toLowerCase();
+  if(/necklace|choker|pendant/.test(s))return"necklace";
+  if(/bracelet|bangle|cuff/.test(s))return"bracelet";
+  if(/anklet/.test(s))return"anklet";
+  if(/earring|hoop|stud/.test(s))return"earring";
+  if(/\bring/.test(s))return"ring";
+  if(/watch/.test(s))return"watch";
+  if(/chain/.test(s))return"chain";
+  if(/\bset\b/.test(s))return"set";
+  return"other";
+}
+function mixKind(p){return (p.mixType&&MIX_KINDS[p.mixType])?p.mixType:mixDetect(p.name)}
+function wholesaleGroupKey(p){return `${mixKind(p)}|${Number(p.price).toFixed(2)}`}
 function wholesalePackPieces(p){return 12}
 function wholesalePiecePrice(p){return Number(p.price)/wholesalePackPieces(p)}
 function wholesaleVariants(p){
@@ -1513,9 +1530,10 @@ function openWholesaleMix(id){
   if(!selected.mixMatch){alert("Mix & Match is not available for this product.");return}
   mixGroup=wholesaleGroupKey(selected);
   mixSelections={};
-  const group=D.wholesale.filter(p=>wholesaleGroupKey(p)===mixGroup&&cat(p)===cat(selected)&&p.mixMatch);
-  document.getElementById("mixTitle").textContent=`Choose your designs · ${money(selected.price)} per dozen`;
-  document.getElementById("mixIntro").textContent=`Choose any combination from the Mix & Match products in this ${money(selected.price)}-per-dozen price group. You can mix the designs, but you cannot mix different wholesale prices.`;
+  const group=D.wholesale.filter(p=>wholesaleGroupKey(p)===mixGroup&&p.mixMatch);
+  const kindLabel=MIX_KINDS[mixKind(selected)]||"items";
+  document.getElementById("mixTitle").textContent=`Mix & Match ${kindLabel} · ${money(selected.price)} per dozen`;
+  document.getElementById("mixIntro").textContent=`Choose any combination from the Mix & Match ${kindLabel.toLowerCase()} at ${money(selected.price)} per dozen. You can mix designs and colours of the same kind of item, but not different kinds (e.g. necklaces with bracelets) or different wholesale prices.`;
   const list=document.getElementById("mixGroupList");
   list.innerHTML=group.map(p=>{
     const variants=wholesaleVariants(p);
@@ -1557,7 +1575,7 @@ function addWholesaleMixToCart(){
   // wholesale products (different feature, different rule) shouldn't block a valid mix purchase.
   const existingWholesaleGroups=[...new Set(cart.filter(x=>x.typ==="wholesale"&&x.key.startsWith("wholesale-mix-")).map(x=>x.wholesaleGroup||"legacy"))];
   if(existingWholesaleGroups.length&&(!existingWholesaleGroups.includes(mixGroup)||existingWholesaleGroups.length>1)){
-    alert("You already have a different wholesale price group in your cart. Different wholesale price groups cannot be mixed in one order.");
+    alert("Your cart already has a different Mix & Match group (a different kind of item or price). Different kinds or prices cannot be mixed together in one Mix & Match order.");
     return;
   }
   const groupProducts=D.wholesale.filter(p=>wholesaleGroupKey(p)===mixGroup);
@@ -2061,21 +2079,23 @@ if(window.matchMedia&&window.matchMedia("(hover:hover) and (pointer:fine)").matc
   });
 }
 
-// THEME TOGGLE (light by default; visitors can switch to dark and it is remembered)
-function applyTheme(theme,remember){
+// THEME TOGGLE
+function applyTheme(theme){
   document.documentElement.setAttribute("data-theme",theme);
   document.getElementById("themeIcon").textContent=theme==="dark"?"☀️":"🌙";
-  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",theme==="dark"?"#0e0d0b":"#faf8f4");
-  if(remember){try{localStorage.setItem("romiluxe-theme-v2",theme)}catch(e){}}
+  try{localStorage.setItem("romiluxe-theme",theme)}catch(e){}
 }
 function toggleTheme(){
   const current=document.documentElement.getAttribute("data-theme")==="dark"?"dark":"light";
-  applyTheme(current==="dark"?"light":"dark",true);
+  applyTheme(current==="dark"?"light":"dark");
 }
 (function initTheme(){
-  let saved="light";
-  try{const v=localStorage.getItem("romiluxe-theme-v2");if(v==="dark"||v==="light")saved=v}catch(e){}
-  applyTheme(saved,false);
+  let saved=null;
+  try{saved=localStorage.getItem("romiluxe-theme")}catch(e){}
+  if(!saved){
+    saved=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+  }
+  applyTheme(saved);
 })();
 </script>
 </body>
